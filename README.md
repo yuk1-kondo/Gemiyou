@@ -1,16 +1,17 @@
-# 🧠 Chatヒューマン
+# 🧠 Gemiyou - ChatHuman
 
 > **革新的な逆チャット体験** - AIがあなたにタスクを依頼し、あなたが応える新しいコミュニケーション形態
 
 ## 🎯 プロジェクト概要
 
-Chatヒューマンは、従来のチャットボットとは正反対のアプローチを採用した革新的なWebアプリケーションです。AIが人間にタスクや依頼を送り、人間がそれに応答し、AIが評価とフィードバックを提供します。
+Gemiyou ChatHumanは、従来のチャットボットとは正反対のアプローチを採用した革新的なWebアプリケーションです。AIが人間にタスクや依頼を送り、人間がそれに応答し、AIが評価とフィードバックを提供します。
 
 ### ✨ 主要機能
 
-- **AI人格システム**: 4つの異なるAI人格（タスクマスター・アキラ、クリエイター・ユイ、アナリスト・ケン、コーチ・サラ）
-- **動的タスク生成**: Gemini AIによる創造的で実行可能なタスクの自動生成
-- **リアルタイム評価**: AIによる即座のフィードバックと建設的な評価
+- **改善されたAI人格システム**: 8つの専門特化AI人格（アイデア発想・物語創作・コピーライティング・デザイン思考・ライフハック・エンタメ・問題解決・表現力）
+- **短時間実行可能タスク**: 3-25分で完結する創造的で楽しいタスクの自動生成
+- **創造性重視設計**: 文章のみで完結する創作・アイデア・物語生成に特化
+- **厳格な自動評価**: Gemini AIによる詳細なフィードバックと建設的な評価
 - **プッシュ通知**: Firebase Cloud Messagingによる新しいタスクの通知
 - **レスポンシブUI**: モダンなグラデーションデザインとスムーズなアニメーション
 
@@ -88,23 +89,39 @@ npm start
 5. **回答提出**: テキストエリアに回答を入力して送信
 6. **評価受取**: AIからの詳細なフィードバックを確認
 
-## 🎭 AI人格紹介
+## 🎭 改善されたAI人格紹介
 
-### タスクマスター・アキラ 📋
-- **特徴**: 効率重視の厳格なタスク管理者
-- **タスク種類**: 生産性向上、時間管理、組織化
+### 🎡 アイデア発想・タケシ
+- **特徴**: 自由な発想とブレインストーミングの専門家
+- **タスク種類**: アイデア出し、創造的思考、コンセプト開発
 
-### クリエイター・ユイ 🎨
-- **特徴**: 創造性と芸術性を重視する自由な発想
-- **タスク種類**: 創作活動、アイデア発想、芸術表現
+### � 物語創作・サクラ
+- **特徴**: 魅力的なストーリーテリングと世界観構築
+- **タスク種類**: 小説執筆、キャラクター創造、プロット開発
 
-### アナリスト・ケン 📊
-- **特徴**: データと論理を愛する客観的分析家
-- **タスク種類**: 分析、比較、論理的思考
+### ✍️ コピーライティング・レン
+- **特徴**: 心に響く文章とマーケティング表現の専門家
+- **タスク種類**: キャッチコピー、商品説明、広告文作成
 
-### コーチ・サラ 💪
-- **特徴**: 成長支援に特化した温かいサポーター
-- **タスク種類**: 自己啓発、スキル向上、モチベーション
+### 🎨 デザイン思考・ミオ
+- **特徴**: ユーザー体験と美的センスを重視するクリエイター
+- **タスク種類**: UI設計、ブランディング、視覚的表現
+
+### 💡 ライフハック・ダイ
+- **特徴**: 日常生活を豊かにする実用的なアイデア提案
+- **タスク種類**: 生活改善、効率化、便利テクニック
+
+### 🎪 エンタメ・ユウ
+- **特徴**: 楽しさと娯楽性を最優先する企画のプロ
+- **タスク種類**: ゲーム企画、イベント案、エンターテイメント
+
+### � 問題解決・アキ
+- **特徴**: 論理的思考と創造的解決策の専門家
+- **タスク種類**: 課題分析、解決案提案、改善アイデア
+
+### 🌟 表現力・ハル
+- **特徴**: 感情と芸術性を大切にする表現のスペシャリスト
+- **タスク種類**: 詩作、感情表現、芸術的創作
 
 ## 🏗️ アーキテクチャ
 
@@ -136,20 +153,4 @@ npm start
 
 ---
 
-**Built with ❤️ for the future of AI-Human interaction**
-
-### `npm run eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
-
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
-
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
+**Built with ❤️ for the future of AI-Human creative collaboration**
