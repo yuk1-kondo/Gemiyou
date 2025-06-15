@@ -6,7 +6,7 @@ const serviceAccount = require('./auth_config.json');
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
-  projectId: 'gemiyou'
+  projectId: 'YOUR_PROJECT_ID'
 });
 
 async function generateVAPIDKey() {
@@ -19,7 +19,7 @@ async function generateVAPIDKey() {
     console.log('✅ Firebase Admin SDK 初期化完了');
     console.log('📋 次のステップ:');
     console.log('1. Firebase Console にアクセス:');
-    console.log('   https://console.firebase.google.com/project/gemiyou/settings/cloudmessaging/');
+    console.log('   https://console.firebase.google.com/');
     console.log('2. "Web configuration" セクションで "Generate key pair" をクリック');
     console.log('3. 生成されたキーを .env.local ファイルに追加:');
     console.log('   REACT_APP_FIREBASE_VAPID_KEY=<生成されたキー>');

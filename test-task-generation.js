@@ -5,7 +5,8 @@ async function testTaskGeneration() {
   try {
     console.log('🧪 タスク生成テスト開始...');
     
-    const response = await fetch('https://createchattask-zptz7iprwa-uc.a.run.app', {
+    // テスト用URL（実際の使用時は環境変数から取得）
+    const response = await fetch('YOUR_CLOUD_FUNCTION_URL_HERE', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

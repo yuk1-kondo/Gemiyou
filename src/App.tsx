@@ -298,7 +298,7 @@ function App() {
                 <ol>
                   <li>
                     <a 
-                      href="https://console.firebase.google.com/project/gemiyou/authentication/providers" 
+                      href="https://console.firebase.google.com" 
                       target="_blank" 
                       rel="noopener noreferrer"
                     >

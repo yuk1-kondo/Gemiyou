@@ -26,7 +26,8 @@ async function testImprovedTaskGeneration() {
     console.log('🎯 特徴: 人間実行可能・創造的・短時間完結');
     
     // テスト用のCloud Functions URL
-    const baseUrl = 'https://us-central1-gemiyou.cloudfunctions.net';
+    // テスト用ベースURL（実際の使用時は環境変数から取得）
+    const baseUrl = 'YOUR_FIREBASE_FUNCTIONS_URL_HERE';
     const endpoint = `${baseUrl}/createChatTask`;
     
     console.log('\n📤 新しいタスク生成API呼び出し中...');
