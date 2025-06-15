@@ -1,0 +1,182 @@
+/* TaskList - 中央配置強制版 */
+
+.task-list {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  text-align: center !important;
+  width: 100% !important;
+  margin: 0 auto !important;
+}
+
+.task-list h2 {
+  text-align: center !important;
+  width: 100% !important;
+  margin-bottom: 24px !important;
+}
+
+.task-list-empty {
+  text-align: center !important;
+  max-width: 500px !important;
+  margin: 0 auto !important;
+  padding: 48px 24px !important;
+  background: #f8f9fa !important;
+  border-radius: 16px !important;
+  border: 2px solid #004c97 !important;
+}
+
+.task-cards {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  width: 100% !important;
+  max-width: 600px !important;
+  margin: 0 auto !important;
+  gap: 16px !important;
+}
+
+.task-card {
+  width: 100% !important;
+  max-width: 500px !important;
+  margin: 0 auto !important;
+  background: #f8f9fa !important;
+  border-radius: 16px !important;
+  padding: 20px !important;
+  border: 2px solid #dee2e6 !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+}
+
+.task-card:hover {
+  transform: translateY(-2px) !important;
+  border-color: #004c97 !important;
+  box-shadow: 0 8px 25px rgba(0, 76, 151, 0.2) !important;
+}
+
+.task-header {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  margin-bottom: 16px !important;
+}
+
+.ai-personality {
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+}
+
+.ai-avatar {
+  width: 40px !important;
+  height: 40px !important;
+  border-radius: 50% !important;
+  background: #004c97 !important;
+  color: white !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-size: 1.25rem !important;
+  border: 3px solid white !important;
+}
+
+.ai-avatar.タスクマスター { background: #eb6100 !important; }
+.ai-avatar.クリエイター { background: #fccc00 !important; color: #2c3e50 !important; }
+.ai-avatar.アナリスト { background: #004c97 !important; }
+.ai-avatar.コーチ { background: #15722c !important; }
+
+.ai-info h3 {
+  margin: 0 0 2px 0 !important;
+  font-size: 0.875rem !important;
+}
+
+.ai-info .ai-type {
+  font-size: 0.75rem !important;
+  color: #737061 !important;
+}
+
+.status-badge {
+  padding: 4px 8px !important;
+  border-radius: 12px !important;
+  font-size: 0.7rem !important;
+  font-weight: 600 !important;
+}
+
+.status-badge.status-in-progress {
+  background: linear-gradient(135deg, var(--bruna-yellow) 0%, var(--bruna-yellow-light) 100%);
+  color: var(--bruna-brown);
+  border: 2px solid var(--bruna-yellow);
+  font-weight: 700;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% { box-shadow: 0 0 0 0 var(--bruna-yellow-light); }
+  70% { box-shadow: 0 0 0 5px transparent; }
+  100% { box-shadow: 0 0 0 0 transparent; }
+}
+
+.status-badge.status-completed {
+  background: linear-gradient(135deg, var(--bruna-green) 0%, var(--bruna-green-light) 100%);
+  color: white;
+  border: 2px solid var(--bruna-green);
+}
+
+.status-badge.status-pending {
+  background: linear-gradient(135deg, var(--bruna-blue) 0%, var(--bruna-blue-light) 100%);
+  color: white;
+  border: 2px solid var(--bruna-blue);
+  animation: bounce 1.5s infinite;
+}
+
+@keyframes bounce {
+  0%, 20%, 53%, 80%, 100% { transform: translate3d(0,0,0); }
+  40%, 43% { transform: translate3d(0,-8px,0); }
+  70% { transform: translate3d(0,-4px,0); }
+  90% { transform: translate3d(0,-2px,0); }
+}
+
+.status-pending {
+  background: rgba(252, 204, 0, 0.2) !important;
+  color: #914e25 !important;
+  border: 2px solid #fccc00 !important;
+}
+
+.status-completed {
+  background: rgba(21, 114, 44, 0.2) !important;
+  color: #15722c !important;
+  border: 2px solid #15722c !important;
+}
+
+.status-evaluated {
+  background: rgba(0, 76, 151, 0.2) !important;
+  color: #004c97 !important;
+  border: 2px solid #004c97 !important;
+}
+
+.task-content {
+  margin-bottom: 16px !important;
+}
+
+.task-request {
+  font-size: 0.875rem !important;
+  line-height: 1.6 !important;
+}
+
+.task-footer {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  padding-top: 12px !important;
+  border-top: 1px solid #dee2e6 !important;
+}
+
+.task-meta {
+  font-size: 0.75rem !important;
+  color: #6c757d !important;
+}
+
+.task-score {
+  font-size: 0.875rem !important;
+  font-weight: 600 !important;
+  color: #004c97 !important;
+}

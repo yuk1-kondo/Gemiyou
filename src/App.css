@@ -1,38 +1,409 @@
+/* DICK BRUNA COLORS - FORCE OVERRIDE */
+html, body, #root, .App {
+  background-color: #fccc00 !important; /* ディック・ブルーナー黄色 */
+  color: #2c3e50 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* さらに強力な強制適用 */
+html {
+  background: #fccc00 !important;
+}
+
+body {
+  background: #fccc00 !important;
+  color: #2c3e50 !important;
+}
+
+#root {
+  background: #fccc00 !important;
+}
+
+div.App {
+  background: #fccc00 !important;
+}
+
+/* 絶対強制適用 */
+* {
+  box-sizing: border-box !important;
+}
+
+/* ヘッダーテスト */
+.app-header,
+header.app-header,
+div.app-header {
+  background-color: #eb6100 !important; /* ディック・ブルーナー赤 */
+  color: white !important;
+  padding: 20px !important;
+  border-bottom: 5px solid #004c97 !important; /* ディック・ブルーナー青 */
+}
+
+/* ボタンテスト */
+.generate-task-btn,
+button.generate-task-btn {
+  background-color: #004c97 !important; /* ディック・ブルーナー青 */
+  color: white !important;
+  border: 3px solid #15722c !important; /* ディック・ブルーナー緑 */
+  padding: 15px 30px !important;
+  border-radius: 25px !important;
+  font-weight: bold !important;
+  font-size: 16px !important;
+}
+
+/* Dick Bruna Color Variables with RGB values */
+:root {
+  /* Dick Bruna Primary Colors */
+  --bruna-red: #eb6100;
+  --bruna-red-rgb: 235, 97, 0;
+  --bruna-red-light: #ff8533;
+  --bruna-red-dark: #cc4400;
+  
+  --bruna-blue: #004c97;
+  --bruna-blue-rgb: 0, 76, 151;
+  --bruna-blue-light: #3366cc;
+  --bruna-blue-dark: #003366;
+  
+  --bruna-green: #15722c;
+  --bruna-green-rgb: 21, 114, 44;
+  --bruna-green-light: #33aa55;
+  --bruna-green-dark: #0d4d1f;
+  
+  --bruna-yellow: #fccc00;
+  --bruna-yellow-rgb: 252, 204, 0;
+  --bruna-yellow-light: #ffdd33;
+  --bruna-yellow-dark: #cc9900;
+  
+  --bruna-brown: #914e25;
+  --bruna-brown-rgb: 145, 78, 37;
+  --bruna-brown-light: #b8652f;
+  --bruna-brown-dark: #6b3a1c;
+  
+  --bruna-gray: #737061;
+  --bruna-gray-rgb: 115, 112, 97;
+  --bruna-gray-light: #8a8774;
+  --bruna-gray-dark: #5c5a4e;
+  
+  /* Background and Text */
+  --bg-primary: #ffffff;
+  --bg-secondary: #f8f9fa;
+  --text-primary: #2c3e50;
+  --text-secondary: #6c757d;
+  
+  /* Shadows and Effects */
+  --card-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  --hover-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+}
+
+/* AI Chat Interface Styles */
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif !important;
+  background: #fccc00 !important; /* ディック・ブルーナー黄色 */
+  color: #2c3e50 !important;
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
 .App {
+  min-height: 100vh !important;
+  display: flex !important;
+  flex-direction: column !important;
+  background: #fccc00 !important; /* ディック・ブルーナー黄色 */
+  align-items: center !important;
+  justify-content: center !important;
+  text-align: center !important;
+  width: 100% !important;
+  margin: 0 auto !important;
+  padding: 0 !important;
+}
+
+/* Modern Header */
+.app-header {
+  background: #eb6100 !important; /* 強制適用 */
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  border-bottom: 2px solid #004c97 !important;
+  padding: 16px 24px !important;
+  width: 100% !important;
+  z-index: 100 !important;
+  box-shadow: 0 2px 12px rgba(0, 76, 151, 0.1) !important;
+  position: relative !important;
+  flex-shrink: 0 !important;
+}
+
+.header-content {
+  max-width: 1000px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  width: 100%;
+}
+
+.app-header h1 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: white !important;
+  display: flex;
+  align-items: center;
+  gap: 8px;
   text-align: center;
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
+.app-header p {
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.9) !important;
+  margin: 4px 0 0 0;
+  text-align: center;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
+.test-mode-badge {
+  background: var(--bruna-yellow);
+  color: var(--text-primary);
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.025em;
+  text-transform: uppercase;
+  border: 2px solid var(--bruna-brown);
+  box-shadow: 0 2px 8px rgba(252, 204, 0, 0.3);
 }
 
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
+/* Main Content */
+.app-main {
+  flex: 1 !important;
+  max-width: 800px !important;
+  margin: 0 auto !important;
+  padding: 24px !important;
+  width: 100% !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  text-align: center !important;
+  min-height: calc(100vh - 120px) !important;
+}
+
+/* Action Section */
+.action-section {
+  margin-bottom: 32px !important;
+  text-align: center !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 100% !important;
+}
+
+.generate-task-btn {
+  background: #004c97 !important; /* ディック・ブルーナー青 */
+  color: white !important;
+  border: 3px solid #15722c !important; /* ディック・ブルーナー緑 */
+  padding: 12px 24px !important;
+  border-radius: 20px !important;
+  font-size: 0.875rem !important;
+  font-weight: 600 !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  min-width: 180px !important;
+  justify-content: center !important;
+  box-shadow: 0 4px 12px rgba(0, 76, 151, 0.3) !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.025em !important;
+}
+
+.generate-task-btn:hover:not(:disabled) {
+  transform: translateY(-2px) !important;
+  background: #eb6100 !important; /* ディック・ブルーナー赤 */
+  box-shadow: 0 6px 20px rgba(235, 97, 0, 0.4) !important;
+}
+
+.generate-task-btn:active {
+  transform: translateY(0);
+}
+
+.generate-task-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Loading Container */
+.loading-container {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+  min-height: 60vh;
+  text-align: center;
+  max-width: 500px;
+  margin: 0 auto;
+  padding: 40px 20px;
 }
 
-.App-link {
-  color: #61dafb;
+.loading-spinner {
+  font-size: 2rem;
+  margin-bottom: 16px;
+  animation: spin 2s linear infinite;
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.init-status {
+  font-size: 0.875rem;
+  color: var(--bruna-blue);
+  margin: 16px 0;
+  font-weight: 500;
+}
+
+.loading-hint {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-top: 24px;
+}
+
+/* 中央配置ヘルパークラス */
+.center-content {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  text-align: center !important;
+  width: 100% !important;
+  max-width: 800px !important;
+  margin: 0 auto !important;
+}
+
+.center-list {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  width: 100% !important;
+}
+
+/* Error Help Section */
+.error-help {
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: 12px;
+  padding: 20px;
+  margin: 24px 0;
+  text-align: left;
+  max-width: 500px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.error-help h4 {
+  margin: 0 0 16px 0;
+  color: var(--error-color);
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.error-help ol {
+  margin: 16px 0;
+  padding-left: 20px;
+  color: var(--text-secondary);
+}
+
+.error-help li {
+  margin: 8px 0;
+  font-size: 0.875rem;
+}
+
+.error-help a {
+  color: var(--accent-primary);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.error-help a:hover {
+  text-decoration: underline;
+}
+
+.retry-btn {
+  background: var(--success-color);
+  color: var(--text-primary);
+  border: none;
+  padding: 8px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 500;
+  margin-top: 16px;
+  transition: all 0.2s ease;
+}
+
+.retry-btn:hover {
+  background: #059669;
+  transform: translateY(-1px);
+}
+
+/* Notification Banner */
+.notification-banner {
+  background: rgba(79, 70, 229, 0.1);
+  border: 1px solid rgba(79, 70, 229, 0.3);
+  border-radius: 12px;
+  padding: 16px 20px;
+  margin-bottom: 24px;
+  position: relative;
+}
+
+.notification-banner h3 {
+  margin: 0 0 8px 0;
+  font-size: 1rem;
+  color: var(--accent-primary);
+}
+
+.notification-banner p {
+  margin: 4px 0;
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+}
+
+.notification-banner button {
+  position: absolute;
+  top: 12px;
+  right: 16px;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 1.25rem;
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.notification-banner button:hover {
+  background: var(--hover-bg);
+  color: var(--text-primary);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .app-main {
+    padding: 16px;
   }
-  to {
-    transform: rotate(360deg);
+  
+  .app-header {
+    padding: 12px 16px;
+  }
+  
+  .app-header h1 {
+    font-size: 1.25rem;
+  }
+  
+  .generate-task-btn {
+    min-width: 140px;
+    font-size: 0.8rem;
   }
 }
