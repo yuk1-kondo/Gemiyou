@@ -1,0 +1,15 @@
+{
+  "files": {
+    "main.css": "/Gemiyou/static/css/main.29ff76af.css",
+    "main.js": "/Gemiyou/static/js/main.6c4d580f.js",
+    "static/js/453.71cc9af6.chunk.js": "/Gemiyou/static/js/453.71cc9af6.chunk.js",
+    "index.html": "/Gemiyou/index.html",
+    "main.29ff76af.css.map": "/Gemiyou/static/css/main.29ff76af.css.map",
+    "main.6c4d580f.js.map": "/Gemiyou/static/js/main.6c4d580f.js.map",
+    "453.71cc9af6.chunk.js.map": "/Gemiyou/static/js/453.71cc9af6.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.29ff76af.css",
+    "static/js/main.6c4d580f.js"
+  ]
+}
