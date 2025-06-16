@@ -537,22 +537,24 @@ ${chatHistoryText}
 
 ### タスク難易度情報：
 - 難易度: ${taskData.difficultyLevel ? taskData.difficultyLevel.name : "不明"}
-- 複雑度: ${taskData.difficultyLevel ? taskData.difficultyLevel.complexity : "不明"}/7
-- 想定時間: ${taskData.difficultyLevel ? taskData.difficultyLevel.timeLimit : "不明"}
+- 複雑度: ${taskData.difficultyLevel ?
+  taskData.difficultyLevel.complexity : "不明"}/7
+- 想定時間: ${taskData.difficultyLevel ?
+  taskData.difficultyLevel.timeLimit : "不明"}
 - 必要スキル: ${taskData.difficultyLevel ?
   taskData.difficultyLevel.requiredSkills.join(", ") : "不明"}
 
 ### 基本品質チェック（難易度別基準）：
 ${taskData.difficultyLevel && taskData.difficultyLevel.complexity <= 2 ? `
 **初級レベル基準:**
-1. 文字数: ${taskData.difficultyLevel.complexity === 1 ? 
+1. 文字数: ${taskData.difficultyLevel.complexity === 1 ?
   "10文字未満" : "15文字未満"}は不合格 → 0-30点
 2. 関連性: タスクの基本要素に触れているか → 基本的理解度を
    チェック
 3. 努力度: 自分なりに考えた跡があるか → 思考プロセス重視
 4. 表現: 年齢相応の言葉で表現できているか → 適切な言語使用` : ""}
 
-${taskData.difficultyLevel && taskData.difficultyLevel.complexity >= 3 && 
+${taskData.difficultyLevel && taskData.difficultyLevel.complexity >= 3 &&
   taskData.difficultyLevel.complexity <= 4 ? `
 **中級レベル基準:**
 1. 文字数: 30文字未満は不合格 → 0-30点
@@ -1203,7 +1205,6 @@ const generateVariedTaskPrompt = (
     abstract_concept: ["時の流れ", "心の豊かさ", "つながり", "成長"],
     sense: ["視覚", "聴覚", "触覚", "嗅覚", "味覚"],
     traditional: ["書道", "茶道", "華道", "能楽"],
-    modern: ["デジタルアート", "SNS", "VR", "AI"],
     complex_theme: ["多様性と調和", "持続可能な未来", "人間とテクノロジー"],
     social_issue: ["環境問題", "格差問題", "高齢化", "孤独感"],
     routine: ["準備", "通勤", "食事", "掃除"],
@@ -1250,16 +1251,17 @@ const generateVariedTaskPrompt = (
     "感情表現": "表現・デザイン系",
   };
 
-  const primaryCategory = personalityToCategory[aiPersonality.type] || "アイデア創出系";
+  const primaryCategory = personalityToCategory[aiPersonality.type] ||
+    "アイデア創出系";
 
   // 他のカテゴリもランダムに含める（多様性）
   const allCategories = Object.keys(creativeTasks);
   const categories = [primaryCategory];
-  
+
   // 追加カテゴリを1-2個選択
   const additionalCount = Math.random() < 0.6 ? 1 : 2;
   for (let i = 0; i < additionalCount; i++) {
-    const remaining = allCategories.filter(cat => !categories.includes(cat));
+    const remaining = allCategories.filter((cat) => !categories.includes(cat));
     if (remaining.length > 0) {
       const randomCat = remaining[Math.floor(Math.random() * remaining.length)];
       categories.push(randomCat);
@@ -1267,38 +1269,41 @@ const generateVariedTaskPrompt = (
   }
 
   // タスクパターンを選択
-  const selectedCategory = categories[Math.floor(Math.random() * categories.length)];
-  const tasksByDifficulty = creativeTasks[selectedCategory] || creativeTasks["アイデア創出系"];
-  const patterns = tasksByDifficulty[selectedDifficultyKey] || tasksByDifficulty["standard"];
-  
+  const selectedCategory = categories[
+      Math.floor(Math.random() * categories.length)];
+  const tasksByDifficulty = creativeTasks[selectedCategory] ||
+    creativeTasks["アイデア創出系"];
+  const patterns = tasksByDifficulty[selectedDifficultyKey] ||
+    tasksByDifficulty["standard"];
+
   const basePattern = patterns[Math.floor(Math.random() * patterns.length)];
 
   // 変数を置換
   let finalTaskRequest = basePattern;
-  Object.keys(variables).forEach(key => {
-    const regex = new RegExp(`{${key}}`, 'g');
+  Object.keys(variables).forEach((key) => {
+    const regex = new RegExp(`{${key}}`, "g");
     const values = variables[key];
     const selectedValue = values[Math.floor(Math.random() * values.length)];
     finalTaskRequest = finalTaskRequest.replace(regex, selectedValue);
   });
 
   // 既存履歴との重複チェック・回避
-  const recentRequests = userHistory.slice(0, 5).map(h => h.request || '');
+  const recentRequests = userHistory.slice(0, 5).map((h) => h.request || "");
   let attempts = 0;
   while (attempts < 3) {
-    const similarity = recentRequests.some(recent => {
-      const commonWords = finalTaskRequest.split('').filter(char => 
+    const similarity = recentRequests.some((recent) => {
+      const commonWords = finalTaskRequest.split("").filter((char) =>
         recent.includes(char)).length;
       return commonWords > finalTaskRequest.length * 0.4;
     });
-    
+
     if (!similarity) break;
-    
+
     // 別のパターンを試す
     const newPattern = patterns[Math.floor(Math.random() * patterns.length)];
     finalTaskRequest = newPattern;
-    Object.keys(variables).forEach(key => {
-      const regex = new RegExp(`{${key}}`, 'g');
+    Object.keys(variables).forEach((key) => {
+      const regex = new RegExp(`{${key}}`, "g");
       const values = variables[key];
       const selectedValue = values[Math.floor(Math.random() * values.length)];
       finalTaskRequest = finalTaskRequest.replace(regex, selectedValue);
@@ -1310,7 +1315,7 @@ const generateVariedTaskPrompt = (
   const today = new Date();
   const month = today.getMonth() + 1;
   let seasonalContext = "";
-  
+
   if (month >= 3 && month <= 5) {
     seasonalContext = "春の新しい始まりの季節を意識して、";
   } else if (month >= 6 && month <= 8) {
@@ -1365,55 +1370,9 @@ const generateVariedTaskPrompt = (
     "requiredSkills": ${JSON.stringify(selectedDifficulty.requiredSkills)}
   },
   "category": "${selectedCategory}",
-  "evaluationFocus": ["${aiPersonality.evaluationCriteria.join('", "')}"]
+  "evaluationFocus": ["${aiPersonality.evaluationCriteria.join("\", \"")}"]
 }
 
-  return `あなたは${aiPersonality.name}として、人間が短時間で実行可能な創造的タスクを出してください。
-
-## あなたの特徴:
-- 専門分野: ${aiPersonality.type}
-- 性格: ${aiPersonality.personality}
-- 得意分野: ${aiPersonality.expertise.join(", ")}
-- タスクスタイル: ${aiPersonality.taskStyle}
-
-## タスク設計方針:
-✅ **人間が実際に実行可能** (${selectedDifficulty.timeLimit}以内)
-✅ **創造性・思考力を刺激**
-✅ **文章のみで完結可能**
-✅ **楽しく取り組める**
-✅ **具体的で明確な成果物**
-
-## 選択された難易度:
-- レベル: ${selectedDifficulty.name}
-- 説明: ${selectedDifficulty.description}
-- 想定時間: ${selectedDifficulty.timeLimit}
-- 必要スキル: ${selectedDifficulty.requiredSkills.join(", ")}
-
-## 考慮要素:
-- 現在日時: ${currentDate}
-- ${seasonalContext}
-- カテゴリ: ${selectedCategory}
-- 過去のタスク履歴を避けて新鮮さを保つ
-
-## 今回のタスク依頼:
-"${finalTaskRequest}"
-
-このタスクを基に、以下のJSON形式で返してください:
-
-{
-  "request": "具体的で魅力的なタスク内容（人間が楽しく取り組める形で）",
-  "context": "タスクの背景・意図・なぜ重要かの説明",
-  "expectedOutput": "期待する成果物の具体的な形式・分量",
-  "tips": "取り組みのコツ・ヒント（創造性を刺激する）",
-  "difficultyLevel": {
-    "name": "${selectedDifficulty.name}",
-    "complexity": ${selectedDifficulty.complexity},
-    "timeLimit": "${selectedDifficulty.timeLimit}",
-    "requiredSkills": ${JSON.stringify(selectedDifficulty.requiredSkills)}
-  },
-  "category": "${selectedCategory}",
-  "evaluationFocus": ["${aiPersonality.evaluationCriteria.join('", "')}"]
-}
-
-**重要**: タスクは人間が現実的に短時間で実行でき、文章で表現できる創造的・思考的な内容にしてください。実際の行動や特別な道具が必要なタスクは避けてください。`;
+**重要**: タスクは人間が現実的に短時間で実行でき、文章で表現できる創造的・
+思考的な内容にしてください。実際の行動や特別な道具が必要なタスクは避けてください。`;
 };
