@@ -4,12 +4,12 @@ import { getMessaging, getToken, onMessage, type Messaging } from 'firebase/mess
 import { getAuth, signInAnonymously, onAuthStateChanged, User } from 'firebase/auth';
 
 const firebaseConfig = {
-  apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
-  authDomain: process.env.REACT_APP_FIREBASE_AUTH_DOMAIN,
-  projectId: process.env.REACT_APP_FIREBASE_PROJECT_ID,
-  storageBucket: process.env.REACT_APP_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: process.env.REACT_APP_FIREBASE_MESSAGING_SENDER_ID,
-  appId: process.env.REACT_APP_FIREBASE_APP_ID,
+  apiKey: "AIzaSyCm_lys36ejCVXQ9Uof_9kN_vPSnjtyxm8",
+  authDomain: "gemiyou.firebaseapp.com",
+  projectId: "gemiyou",
+  storageBucket: "gemiyou.firebasestorage.app",
+  messagingSenderId: "1047854827926",
+  appId: "1:1047854827926:web:e2d3b45f2a8c7d8f123456"
 };
 
 // Initialize Firebase
@@ -22,6 +22,7 @@ console.log('- Project ID:', firebaseConfig.projectId);
 // Initialize Firebase services
 export const db = getFirestore(app);
 export const auth = getAuth(app);
+export { app }; // appをエクスポート
 
 console.log('🔥 Firebase サービス初期化完了');
 console.log('- Firestore:', db.app.name);

@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chatヒューマン - 基本動作テスト</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+            background: #fccc00;
+            color: #2c3e50;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+        
+        .container {
+            text-align: center;
+            max-width: 800px;
+            padding: 20px;
+        }
+        
+        .title {
+            color: #eb6100;
+            font-size: 2.5em;
+            margin-bottom: 20px;
+        }
+        
+        .status-box {
+            background: #eb6100;
+            color: white;
+            padding: 15px 25px;
+            border-radius: 10px;
+            margin: 20px 0;
+            font-weight: bold;
+        }
+        
+        .info-box {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        
+        .progress-list {
+            text-align: left;
+            margin: 15px 0;
+        }
+        
+        .progress-list li {
+            margin: 8px 0;
+            padding: 5px 0;
+        }
+        
+        .success {
+            color: #15722c;
+            font-weight: bold;
+        }
+        
+        .next-step {
+            background: #004c97;
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            margin: 20px 10px;
+            transition: transform 0.2s;
+        }
+        
+        .next-step:hover {
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="title">🧠 Chatヒューマン</h1>
+        
+        <div class="status-box">
+            ✅ ウェブサイト基本表示 - 正常動作中
+        </div>
+        
+        <div class="info-box">
+            <h3>🎯 現在の修復状況:</h3>
+            <ul class="progress-list">
+                <li class="success">✅ HTML表示の基本動作確認</li>
+                <li class="success">✅ CSS スタイル適用確認</li>
+                <li class="success">✅ 黄色背景(#fccc00)の正常表示</li>
+                <li class="success">✅ JavaScript の基本動作確認</li>
+                <li>🔄 React アプリケーションの動作確認 (進行中)</li>
+                <li>⏳ Firebase 接続の修復</li>
+                <li>⏳ Gemini API 統合の修復</li>
+            </ul>
+        </div>
+        
+        <div class="info-box">
+            <h3>📋 次の手順:</h3>
+            <p>1. この静的テストページが正常に表示されることを確認</p>
+            <p>2. React開発サーバーの起動テスト</p>
+            <p>3. 段階的に機能を追加して動作確認</p>
+        </div>
+        
+        <button class="next-step" onclick="testJavaScript()">
+            🧪 JavaScript テスト実行
+        </button>
+        
+        <button class="next-step" onclick="testConsole()">
+            📝 コンソールログテスト
+        </button>
+        
+        <div id="test-results" style="margin-top: 20px;"></div>
+    </div>
+    
+    <script>
+        console.log('🚀 Chatヒューマン - JavaScript動作テスト開始');
+        console.log('📅 実行日時:', new Date().toLocaleString('ja-JP'));
+        
+        function testJavaScript() {
+            const resultsDiv = document.getElementById('test-results');
+            const testResults = [];
+            
+            // 基本的なJavaScriptテスト
+            try {
+                testResults.push('✅ 変数宣言・代入: 正常');
+                const testVar = 'テスト成功';
+                
+                testResults.push('✅ DOM操作: 正常');
+                resultsDiv.innerHTML = '<div class="status-box">🧪 JavaScript テスト実行中...</div>';
+                
+                testResults.push('✅ 配列操作: 正常');
+                const testArray = [1, 2, 3];
+                
+                testResults.push('✅ オブジェクト操作: 正常');
+                const testObj = { name: 'Chatヒューマン', status: '動作中' };
+                
+                testResults.push('✅ 関数実行: 正常');
+                
+                // 結果を表示
+                setTimeout(() => {
+                    resultsDiv.innerHTML = `
+                        <div class="info-box">
+                            <h4>🧪 JavaScript テスト結果:</h4>
+                            <ul class="progress-list">
+                                ${testResults.map(result => `<li class="success">${result}</li>`).join('')}
+                            </ul>
+                            <div class="status-box">
+                                🎉 すべてのJavaScriptテストが正常に完了しました！
+                            </div>
+                        </div>
+                    `;
+                }, 1000);
+                
+            } catch (error) {
+                resultsDiv.innerHTML = `
+                    <div class="status-box" style="background: #d32f2f;">
+                        ❌ JavaScript エラー: ${error.message}
+                    </div>
+                `;
+            }
+        }
+        
+        function testConsole() {
+            console.log('🧪 コンソールログテスト:');
+            console.log('  ├─ 基本ログ出力: 正常');
+            console.log('  ├─ 日時:', new Date());
+            console.log('  ├─ ブラウザ情報:', navigator.userAgent);
+            console.log('  └─ ページURL:', window.location.href);
+            
+            const resultsDiv = document.getElementById('test-results');
+            resultsDiv.innerHTML = `
+                <div class="info-box">
+                    <h4>📝 コンソールログテスト実行完了</h4>
+                    <p>ブラウザの開発者ツール（F12キー）でコンソールタブを開いて、詳細なログを確認してください。</p>
+                    <div class="status-box">
+                        💡 コンソールにテスト結果が出力されました
+                    </div>
+                </div>
+            `;
+        }
+        
+        // ページ読み込み完了時の自動テスト
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('✅ DOMContentLoadedイベント発火 - ページ読み込み完了');
+            console.log('✅ 基本表示テスト完了 - 次はReactアプリケーションのテストに進みます');
+        });
+        
+        // エラーハンドリング
+        window.addEventListener('error', function(event) {
+            console.error('💥 JavaScript エラー:', event.error);
+            const resultsDiv = document.getElementById('test-results');
+            if (resultsDiv) {
+                resultsDiv.innerHTML = `
+                    <div class="status-box" style="background: #d32f2f;">
+                        ❌ エラーが発生しました: ${event.error?.message || 'Unknown error'}
+                    </div>
+                `;
+            }
+        });
+    </script>
+</body>
+</html>

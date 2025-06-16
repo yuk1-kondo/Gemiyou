@@ -1,3 +1,5 @@
+import { GoogleGenerativeAI } from '@google/generative-ai';
+
 export interface TaskRequest {
   id: string;
   userId: string;

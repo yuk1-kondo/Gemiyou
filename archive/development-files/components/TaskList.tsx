@@ -1,14 +1,39 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Task } from '../services/firestoreService';
 import { EnhancedTask } from '../services/geminiService';
+import { requestNewTask } from '../services/notificationService';
+import { auth } from '../firebase';
 import './TaskList.css';
 
 interface TaskListProps {
   tasks: (Task | EnhancedTask)[];
   onTaskSelect: (task: Task | EnhancedTask) => void;
+  onTasksUpdate?: () => void; // 新しいタスクが作成された時の更新コールバック
 }
 
-const TaskList: React.FC<TaskListProps> = ({ tasks, onTaskSelect }) => {
+const TaskList: React.FC<TaskListProps> = ({ tasks, onTaskSelect, onTasksUpdate }) => {
+  const [loading, setLoading] = useState(false);
+
+  // 新しいタスクをリクエストする関数
+  const handleRequestNewTask = async (difficulty: string) => {
+    setLoading(true);
+    try {
+      const userId = auth.currentUser?.uid;
+      await requestNewTask(difficulty, userId);
+      
+      // タスクリストを更新
+      if (onTasksUpdate) {
+        onTasksUpdate();
+      }
+      
+      console.log('✅ 新しいタスクを作成しました');
+    } catch (error) {
+      console.error('❌ 新しいタスクのリクエストに失敗:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const formatDate = (date: Date) => {
     return new Intl.DateTimeFormat('ja-JP', {
       month: 'short',
@@ -128,6 +153,33 @@ const TaskList: React.FC<TaskListProps> = ({ tasks, onTaskSelect }) => {
             </div>
           );
         })}
+      </div>
+
+      <div className="new-task-request">
+        <h3>新しいタスクをリクエスト</h3>
+        <div className="difficulty-buttons">
+          <button 
+            className="difficulty-button" 
+            onClick={() => handleRequestNewTask('beginner')}
+            disabled={loading}
+          >
+            {loading ? '作成中...' : '簡単なタスク'}
+          </button>
+          <button 
+            className="difficulty-button" 
+            onClick={() => handleRequestNewTask('intermediate')}
+            disabled={loading}
+          >
+            {loading ? '作成中...' : '普通のタスク'}
+          </button>
+          <button 
+            className="difficulty-button" 
+            onClick={() => handleRequestNewTask('advanced')}
+            disabled={loading}
+          >
+            {loading ? '作成中...' : '難しいタスク'}
+          </button>
+        </div>
       </div>
     </div>
   );

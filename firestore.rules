@@ -8,14 +8,14 @@ service cloud.firestore {
       allow create: if request.auth != null; // Only authenticated users can create tasks
       allow update: if request.auth != null && 
         (request.auth.uid == resource.data.assignedTo || resource.data.assignedTo == null);
-      allow delete: if false; // No deletion allowed
+      allow delete: if false; // No deletion allowed in production
       
       // Responses subcollection
       match /responses/{responseId} {
         allow read: if true; // Anyone can read responses
         allow create: if request.auth != null; // Only authenticated users can create responses
         allow update: if request.auth != null && request.auth.uid == resource.data.userId;
-        allow delete: if false; // No deletion allowed
+        allow delete: if false; // No deletion allowed in production
       }
     }
     

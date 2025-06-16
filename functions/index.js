@@ -201,6 +201,362 @@ const AI_PERSONALITIES = [
   },
 ];
 
+// 新しい動的タスク生成システム
+const taskGenerationPrompts = {
+  beginner: {
+    themes: [
+      "日常生活のアイデア出し",
+      "簡単な壁打ち・相談",
+      "3行程度の短い物語創作",
+      "今日の振り返り・要約",
+      "身近な話題での発想"
+    ],
+    instructions: `
+初心者レベルの簡単で親しみやすいタスクを1つ生成してください。
+以下の条件を満たすタスクにしてください：
+- 1〜3行程度で回答できる
+- 専門知識不要
+- 日常的で身近な話題
+- 気軽に取り組める内容
+- アイデア出し、壁打ち、簡単な創作、要約のいずれか
+
+例：
+- 今日の夕食メニューを3つ提案してください
+- 最近気になっていることを教えてください  
+- 雨の日の小さな冒険を3行で書いてください
+- 今日やったことを3つのポイントでまとめてください
+`
+  },
+  
+  intermediate: {
+    themes: [
+      "詳細なアイデア企画",
+      "深い相談・壁打ち",
+      "構造化された創作",
+      "分析・整理タスク",
+      "体験談の共有"
+    ],
+    instructions: `
+中級レベルの少し考える要素があるタスクを1つ生成してください。
+以下の条件を満たすタスクにしてください：
+- 5〜10行程度で回答できる
+- 少し詳しく考える必要がある
+- 個人的な体験や意見を求める
+- 創意工夫の余地がある内容
+
+例：
+- 友達を驚かせるサプライズアイデアを考えて説明してください
+- 将来やってみたいことの最初の一歩を考えてください
+- 好きな色から連想される物語設定を作ってください
+- 今月の成長点を具体例と共に教えてください
+`
+  },
+  
+  advanced: {
+    themes: [
+      "複合的な企画・提案",
+      "価値観の深掘り",
+      "構造化された創作",
+      "問題解決・分析",
+      "総合的な振り返り"
+    ],
+    instructions: `
+上級レベルの考える要素が多いタスクを1つ生成してください。
+以下の条件を満たすタスクにしてください：
+- 10行以上で回答できる
+- 複数の要素を組み合わせて考える
+- 体系的・構造的な回答を求める
+- 個人の価値観や経験を深く掘り下げる
+
+例：
+- 地域活性化イベントを企画して詳細を説明してください
+- 人生で大切な価値観を体験談と共に説明してください
+- 記憶に残る風景を五感で描写してください
+- 自分の強みを活かす方法を具体的に考えてください
+`
+  }
+};
+
+// 新機能：GeminiAPIでタスクを動的生成
+async function generateTaskWithGemini(difficulty, aiPersonality) {
+  const promptConfig = taskGenerationPrompts[difficulty];
+  const randomTheme = promptConfig.themes[Math.floor(Math.random() * promptConfig.themes.length)];
+  
+  const prompt = `
+あなたは「${aiPersonality.name}」として、以下の条件でタスクを1つ生成してください。
+
+【あなたの特徴】
+${aiPersonality.personality}
+専門分野: ${aiPersonality.expertise.join(", ")}
+重視する点: ${aiPersonality.evaluationCriteria.join(", ")}
+
+【タスク生成条件】
+難易度: ${difficulty}
+テーマ: ${randomTheme}
+${promptConfig.instructions}
+
+【重要】
+- ${aiPersonality.name}らしい視点や言葉遣いでタスクを作成
+- 人間が楽しく取り組める内容にする
+- 創造性を刺激する要素を含める
+- 答えに正解・不正解がないオープンな質問にする
+
+以下のJSON形式で1つのタスクを返してください：
+{
+  "task": "具体的なタスク内容（1文〜2文）",
+  "hint": "取り組むヒントや視点（1文）",
+  "expectation": "どんな回答を期待しているか（1文）"
+}
+`;
+
+  try {
+    const model = genAI.getGenerativeModel({model: "gemini-1.5-flash"});
+    const result = await model.generateContent(prompt);
+    const responseText = result.response.text();
+    
+    const jsonMatch = responseText.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) {
+      throw new Error("Invalid JSON response from AI");
+    }
+    
+    const taskData = JSON.parse(jsonMatch[0]);
+    
+    return {
+      content: taskData.task,
+      hint: taskData.hint,
+      expectation: taskData.expectation,
+      generatedAt: new Date().toISOString()
+    };
+  } catch (error) {
+    logger.error('タスク生成エラー:', error);
+    
+    // フォールバック：シンプルなタスクを返す
+    const fallbackTasks = {
+      beginner: "今日一番印象に残った出来事を一文で教えてください。",
+      intermediate: "最近学んだことを一つ挙げて、どう活用したいか教えてください。",
+      advanced: "理想の一日を時系列で説明し、なぜそれが理想なのか理由も教えてください。"
+    };
+    
+    return {
+      content: fallbackTasks[difficulty],
+      hint: "自分らしく、素直に答えてみてください。",
+      expectation: "あなたの個性や体験が感じられる回答を期待しています。",
+      generatedAt: new Date().toISOString()
+    };
+  }
+}
+
+// 簡単な評価関数
+async function evaluateChatResponse(taskContent, userResponse, difficulty) {
+  const prompt = `
+タスク: ${taskContent}
+ユーザーの回答: ${userResponse}
+難易度: ${difficulty}
+
+以下の基準で評価してください（各項目5点満点）：
+
+1. 取り組み姿勢（5点）
+   - タスクに対して真摯に取り組んでいるか
+   - 自分なりに考えて答えているか
+
+2. 内容の充実度（5点）
+   - 求められた内容に答えているか
+   - 具体性や詳細さは適切か
+
+3. 創意工夫（5点）
+   - 独自性や個性が感じられるか
+   - 面白い視点や発想があるか
+
+評価基準：
+- 難しく考えすぎず、素直な回答を高く評価
+- 完璧でなくても、本人なりの工夫があれば評価
+- 短い回答でも、心がこもっていれば良し
+- アイデア系は実現可能性より発想力を重視
+- 壁打ち系は正解不正解ではなく、自分らしさを評価
+
+必ず以下のJSON形式で返してください：
+{
+  "score": 総合点（15点満点）,
+  "feedback": "優しく具体的なフィードバック（100字程度）",
+  "encouragement": "次回への励ましの言葉（50字程度）",
+  "breakdown": {
+    "attitude": 取り組み姿勢の点数,
+    "content": 内容充実度の点数,
+    "creativity": 創意工夫の点数
+  }
+}`;
+
+  try {
+    const model = genAI.getGenerativeModel({model: "gemini-1.5-flash"});
+    const result = await model.generateContent(prompt);
+    const responseText = result.response.text();
+    
+    const jsonMatch = responseText.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) {
+      throw new Error("Invalid JSON response from AI evaluation");
+    }
+    
+    return JSON.parse(jsonMatch[0]);
+  } catch (error) {
+    logger.error('評価エラー:', error);
+    return {
+      score: 12,
+      feedback: "お疲れさまでした！あなたなりに一生懸命取り組んでくれたことが伝わってきます。",
+      encouragement: "次回も気軽に挑戦してくださいね！",
+      breakdown: { attitude: 4, content: 4, creativity: 4 }
+    };
+  }
+}
+
+// 新しい動的タスク作成エンドポイント
+exports.createDynamicTask = onRequest(async (req, res) => {
+  // Set CORS headers
+  res.set("Access-Control-Allow-Origin", "*");
+  res.set("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+  res.set("Access-Control-Allow-Headers", "Content-Type");
+
+  // Handle preflight request
+  if (req.method === "OPTIONS") {
+    res.status(204).send("");
+    return;
+  }
+
+  try {
+    if (req.method !== "POST") {
+      res.status(405).send("Method not allowed");
+      return;
+    }
+
+    const { difficulty = 'beginner', userId } = req.body;
+
+    // ランダムにAI人格を選択
+    const randomPersonality = AI_PERSONALITIES[Math.floor(Math.random() * AI_PERSONALITIES.length)];
+    
+    // GeminiAPIでタスクを動的生成
+    const generatedTask = await generateTaskWithGemini(difficulty, randomPersonality);
+    
+    // Firestoreに保存するタスクデータ
+    const taskData = {
+      userId: userId || null,
+      aiPersonality: randomPersonality,
+      difficulty,
+      content: generatedTask.content,
+      hint: generatedTask.hint,
+      expectation: generatedTask.expectation,
+      status: 'pending',
+      createdAt: admin.firestore.FieldValue.serverTimestamp(),
+      generatedAt: generatedTask.generatedAt,
+      chatHistory: [],
+      isCompleted: false,
+      evaluation: null
+    };
+
+    // タスクをFirestoreに保存
+    const taskRef = await db.collection('tasks').add(taskData);
+    
+    logger.info('✅ 動的タスク生成完了:', taskRef.id);
+    
+    // 通知送信
+    if (userId) {
+      const userDoc = await db.collection('users').doc(userId).get();
+      if (userDoc.exists && userDoc.data().fcmToken) {
+        await sendNotificationToUser(
+          userDoc.data().fcmToken,
+          `🧠 ${randomPersonality.name}からの依頼`,
+          generatedTask.content.length > 60 ?
+            generatedTask.content.substring(0, 57) + "..." :
+            generatedTask.content,
+          {
+            taskId: taskRef.id,
+            difficulty: difficulty,
+            aiPersonality: randomPersonality.name,
+          }
+        );
+      }
+    }
+
+    return res.json({
+      success: true,
+      taskId: taskRef.id,
+      message: `${randomPersonality.name}から新しいタスクが届きました！`,
+      task: {
+        id: taskRef.id,
+        ...taskData,
+        createdAt: new Date().toISOString()
+      }
+    });
+
+  } catch (error) {
+    logger.error('❌ 動的タスク生成エラー:', error);
+    return res.status(500).json({ error: 'タスクの生成に失敗しました' });
+  }
+});
+
+// 簡単な評価エンドポイント
+exports.evaluateTaskResponse = onRequest(async (req, res) => {
+  // Set CORS headers
+  res.set("Access-Control-Allow-Origin", "*");
+  res.set("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+  res.set("Access-Control-Allow-Headers", "Content-Type");
+
+  // Handle preflight request
+  if (req.method === "OPTIONS") {
+    res.status(204).send("");
+    return;
+  }
+
+  try {
+    if (req.method !== "POST") {
+      res.status(405).send("Method not allowed");
+      return;
+    }
+
+    const { taskId, userResponse } = req.body;
+
+    // タスクデータを取得
+    const taskDoc = await db.collection('tasks').doc(taskId).get();
+    if (!taskDoc.exists) {
+      return res.status(404).json({ error: 'タスクが見つかりません' });
+    }
+
+    const taskData = taskDoc.data();
+    
+    // AI評価を実行
+    const evaluation = await evaluateChatResponse(
+      taskData.content,
+      userResponse,
+      taskData.difficulty
+    );
+
+    // チャット履歴に追加
+    const chatMessage = {
+      sender: 'user',
+      content: userResponse,
+      timestamp: admin.firestore.FieldValue.serverTimestamp(),
+      evaluation: evaluation
+    };
+
+    // タスクを更新
+    await db.collection('tasks').doc(taskId).update({
+      chatHistory: admin.firestore.FieldValue.arrayUnion(chatMessage),
+      lastUpdate: admin.firestore.FieldValue.serverTimestamp(),
+      status: evaluation.score >= 10 ? 'completed' : 'in_progress',
+      isCompleted: evaluation.score >= 10,
+      evaluation: evaluation
+    });
+
+    return res.json({
+      success: true,
+      evaluation: evaluation,
+      message: 'タスクの評価が完了しました'
+    });
+
+  } catch (error) {
+    logger.error('❌ 評価エラー:', error);
+    return res.status(500).json({ error: '評価に失敗しました' });
+  }
+});
+
 // Generate AI Task Function (Scheduled) - Individual User Notifications
 exports.generateAITask = onSchedule("every 30 minutes", async (event) => {
   try {
@@ -222,46 +578,27 @@ exports.generateAITask = onSchedule("every 30 minutes", async (event) => {
         const randomIndex = Math.floor(Math.random() * AI_PERSONALITIES.length);
         const aiPersonality = AI_PERSONALITIES[randomIndex];
 
-        // Generate task using Enhanced AI with variety
-        const model = genAI.getGenerativeModel({model: "gemini-1.5-flash"});
-
-        // Get user's task history to avoid repetition
-        const userTasksSnapshot = await db.collection("users")
-            .doc(user.userId)
-            .collection("tasks")
-            .orderBy("createdAt", "desc")
-            .limit(10)
-            .get();
-
-        const userHistory = userTasksSnapshot.docs.map((doc) => doc.data());
-        const currentDate = new Date().toLocaleDateString("ja-JP");
-
-        // Generate varied prompt using new system
-        const dynamicPrompt = generateVariedTaskPrompt(
-            aiPersonality,
-            userHistory,
-            currentDate,
-        );
-
-        const result = await model.generateContent(dynamicPrompt);
-        const responseText = result.response.text();
-
-        // Parse JSON response
-        const jsonMatch = responseText.match(/\{[\s\S]*\}/);
-        if (!jsonMatch) {
-          throw new Error("Invalid JSON response from AI");
-        }
-
-        const taskData = JSON.parse(jsonMatch[0]);
-
+        // ランダムに難易度を選択
+        const difficulties = ['beginner', 'intermediate', 'advanced'];
+        const randomDifficulty = difficulties[Math.floor(Math.random() * difficulties.length)];
+        
+        // GeminiAPIでタスクを動的生成
+        const generatedTask = await generateTaskWithGemini(randomDifficulty, aiPersonality);
+        
         // Create task document for this specific user
         const task = {
-          ...taskData,
+          content: generatedTask.content,
+          hint: generatedTask.hint,
+          expectation: generatedTask.expectation,
+          difficulty: randomDifficulty,
           aiPersonality: aiPersonality,
           status: "pending",
           createdAt: admin.firestore.FieldValue.serverTimestamp(),
           assignedTo: user.userId,
-          responses: [],
+          chatHistory: [],
+          isCompleted: false,
+          evaluation: null,
+          generatedAt: generatedTask.generatedAt
         };
 
         // Save task to global tasks collection
@@ -275,9 +612,9 @@ exports.generateAITask = onSchedule("every 30 minutes", async (event) => {
 
         // Send FCM notification to the specific user
         const notificationTitle = `🧠 ${aiPersonality.name}からの依頼`;
-        const notificationBody = taskData.request.length > 60 ?
-          taskData.request.substring(0, 57) + "..." :
-          taskData.request;
+        const notificationBody = generatedTask.content.length > 60 ?
+          generatedTask.content.substring(0, 57) + "..." :
+          generatedTask.content;
 
         await sendNotificationToUser(
             user.fcmToken,
@@ -285,16 +622,17 @@ exports.generateAITask = onSchedule("every 30 minutes", async (event) => {
             notificationBody,
             {
               taskId: taskDoc.id,
-              category: taskData.category,
+              difficulty: randomDifficulty,
               aiPersonality: aiPersonality.name,
             },
         );
 
         logger.info(
-            `Task generated and notification sent to user ${user.userId}`,
+            `Dynamic task generated and notification sent to user ${user.userId}`,
             {
               taskId: taskDoc.id,
               aiPersonality: aiPersonality.name,
+              difficulty: randomDifficulty
             },
         );
 
@@ -537,24 +875,22 @@ ${chatHistoryText}
 
 ### タスク難易度情報：
 - 難易度: ${taskData.difficultyLevel ? taskData.difficultyLevel.name : "不明"}
-- 複雑度: ${taskData.difficultyLevel ?
-  taskData.difficultyLevel.complexity : "不明"}/7
-- 想定時間: ${taskData.difficultyLevel ?
-  taskData.difficultyLevel.timeLimit : "不明"}
+- 複雑度: ${taskData.difficultyLevel ? taskData.difficultyLevel.complexity : "不明"}/7
+- 想定時間: ${taskData.difficultyLevel ? taskData.difficultyLevel.timeLimit : "不明"}
 - 必要スキル: ${taskData.difficultyLevel ?
   taskData.difficultyLevel.requiredSkills.join(", ") : "不明"}
 
 ### 基本品質チェック（難易度別基準）：
 ${taskData.difficultyLevel && taskData.difficultyLevel.complexity <= 2 ? `
 **初級レベル基準:**
-1. 文字数: ${taskData.difficultyLevel.complexity === 1 ?
+1. 文字数: ${taskData.difficultyLevel.complexity === 1 ? 
   "10文字未満" : "15文字未満"}は不合格 → 0-30点
 2. 関連性: タスクの基本要素に触れているか → 基本的理解度を
    チェック
 3. 努力度: 自分なりに考えた跡があるか → 思考プロセス重視
 4. 表現: 年齢相応の言葉で表現できているか → 適切な言語使用` : ""}
 
-${taskData.difficultyLevel && taskData.difficultyLevel.complexity >= 3 &&
+${taskData.difficultyLevel && taskData.difficultyLevel.complexity >= 3 && 
   taskData.difficultyLevel.complexity <= 4 ? `
 **中級レベル基準:**
 1. 文字数: 30文字未満は不合格 → 0-30点
@@ -1024,141 +1360,77 @@ const generateVariedTaskPrompt = (
 
   const selectedDifficulty = difficultyLevels[selectedDifficultyKey];
 
-  // 🚀 人間実行可能・創造重視のタスクパターン
+  // 🚀 人間が気軽に楽しめる簡単なタスクパターン
   const creativeTasks = {
-    "アイデア創出系": {
+    "アイデア出し系": {
       "beginner": [
-        "毎日使っている{item}をもっと便利にするアイデアを3つ考えて",
-        "{season}にちなんだ楽しい過ごし方を5つ思いついて",
-        "{color}から連想する楽しいことを自由に書いて",
+        "今日の夕食メニューを3つ提案してください",
+        "{season}の楽しい過ごし方を3つ教えてください",
+        "プレゼントに贈る小物のアイデアを3つ考えてください（予算1000円以内）",
+        "部屋の模様替えの簡単なアイデアを2つ提案してください",
+        "新しい趣味を始めるとしたら何がいいか、3つ提案してください",
       ],
       "casual": [
-        "友達との{event}を盛り上げる新しいアイデアを3つ考えて、理由もつけて",
-        "{problem}を解決する日常的な工夫を考えて、実行方法も説明して",
-        "{theme}をテーマにした1分間ゲームのアイデアを考えて",
+        "友達と一緒にできる新しい遊び方のアイデアを考えて、遊び方も説明してください",
+        "地域の魅力を伝える簡単なキャッチフレーズを3つ考えてください",
+        "日常生活をちょっと便利にする工夫やライフハックを2つ提案してください",
+        "家族や友人を驚かせる、手作りの簡単なサプライズアイデアを考えてください",
       ],
       "standard": [
-        "{target}向けの新サービスアイデアを考えて、特徴と魅力を3つずつ説明して",
-        "{situation}での困りごとを解決する創造的な方法を提案して、メリットも示して",
-        "{category}の常識を覆す新しいアプローチを考えて、具体例も含めて",
-      ],
-      "creative": [
-        "{industry}業界の未来を変える革新的アイデアを提案して、実現性も考慮して",
-        "{challenge}という課題を、全く新しい角度から解決する方法を考えて",
-        "誰もやったことのない{activity}の新しい楽しみ方を発明して",
-      ],
-      "advanced": [
-        "{domain}分野で社会を変えるイノベーションを設計して、段階的実現計画も立てて",
-        "{complex_problem}を根本から解決する統合的ソリューションを提案して",
-        "未来の{technology}を使った新しいライフスタイルを描いて",
+        "地域活性化のイベント企画を考えて、対象者・内容・期待効果を整理してください",
+        "環境に優しい生活習慣を3つ提案し、それぞれの実践方法も説明してください",
+        "多世代が楽しめるコミュニケーションゲームを考案してください",
       ],
     },
-    "ストーリー創作系": {
+    "壁打ち・相談系": {
       "beginner": [
-        "『{title}』というタイトルで、3行の短い物語を書いて",
-        "{character}が{place}で出会った小さな冒険の話を書いて",
-        "今日の{weather}から生まれた物語を自由に書いて",
+        "最近気になっていることを一つ教えてください。どんな些細なことでも構いません",
+        "今日一番印象に残った出来事を一文で教えてください",
+        "もし魔法が使えるなら、一番最初に何をしたいですか？",
+        "子どもの頃好きだった遊びを一つ思い出して教えてください",
+        "今の季節で好きなことを一つ教えてください",
       ],
       "casual": [
-        "電車で隣に座った人との{minutes}分間の物語を書いて",
-        "{object}が主人公の短い童話を書いて、教訓も込めて",
-        "『もしも{situation}だったら』という設定で物語を作って",
+        "最近悩んでいることがあれば、それをどう解決したいか一緒に考えましょう",
+        "将来やってみたいことを一つ挙げて、最初の一歩として何ができそうか考えてください",
+        "もし一日だけ好きな人になれるなら誰になりたいか、理由も含めて教えてください",
       ],
       "standard": [
-        "普通の{job}が実は{secret}だった、という設定で物語を書いて",
-        "{emotion}をテーマにした心温まる短編を書いて、結末も工夫して",
-        "過去と現在が繋がる{genre}の物語を構成して",
-      ],
-      "creative": [
-        "{concept}という概念を擬人化した、哲学的な物語を書いて",
-        "読者が{feeling}になる仕掛けを込めた短編を書いて",
-        "{time_period}と{modern}を融合させた独創的な物語を作って",
-      ],
-      "advanced": [
-        "多層的な時間軸を持つ{genre}作品を構想して、各層の関係性も設計して",
-        "{theme}を現代的に再解釈した、社会性のある物語を書いて",
-        "読み手によって解釈が変わる多義的な{style}作品を創作して",
+        "人生で大切にしている価値観を一つ挙げて、なぜそれが重要なのか体験談と共に説明してください",
+        "理想の一日の過ごし方を時系列で説明し、なぜその過ごし方が理想なのか理由も教えてください",
       ],
     },
-    "表現・デザイン系": {
+    "簡単な物語創作系": {
       "beginner": [
-        "今の気分を{medium}で表現して、理由も簡単に説明して",
-        "{season}の美しさを{words}の詩で表現して",
-        "好きな{food}の魅力を感覚的に描写して",
+        "『雨の日の小さな冒険』というタイトルで、3行の短い物語を作ってください",
+        "動物が主人公の、ほのぼのした1分で読める短いお話を作ってください",
+        "『もしも○○だったら』の○○に好きな言葉を入れて、面白い設定を考えてください",
+        "身近な物（ペン、コップなど）を主人公にした、2〜3行の物語を作ってください",
       ],
       "casual": [
-        "{concept}を視覚的にデザインするとしたら、色・形・素材を決めて理由も説明して",
-        "{brand}の新しいキャッチコピーを3つ考えて、それぞれの狙いも説明して",
-        "{space}を居心地よくするインテリアアイデアを提案して",
+        "季節の変化を感じた瞬間を、詩的な表現で5〜6行で描いてください",
+        "日常の中の小さな発見や気づきを、エッセイ風に200字程度で書いてください",
+        "好きな色から連想される物語の設定を考えて、あらすじを3行で説明してください",
       ],
       "standard": [
-        "{target}に向けた{product}のパッケージデザインコンセプトを考えて",
-        "{message}を伝える効果的な広告表現を3パターン提案して",
-        "{theme}をテーマにした展示会の構成とレイアウトを設計して",
-      ],
-      "creative": [
-        "{abstract_concept}を体験できるインタラクティブな表現方法を考えて",
-        "{emotion}を{sense}で感じられる空間演出を設計して",
-        "{traditional}と{modern}を融合させた新しい表現手法を提案して",
-      ],
-      "advanced": [
-        "{complex_theme}を多感覚で体験できる総合的な表現企画を設計して",
-        "{social_issue}への意識を変える革新的な表現活動を企画して",
-        "参加者が創造性を発揮できるワークショップ形式の表現プログラムを設計して",
+        "身近な出来事から学んだ教訓を、寓話風の短い物語として表現してください",
+        "記憶に残る風景を、五感を使って描写し、そこで感じた感情も表現してください",
       ],
     },
-    "問題解決・改善系": {
+    "要約・整理系": {
       "beginner": [
-        "朝の{routine}をもっと楽しくする方法を3つ考えて",
-        "{daily_problem}を簡単に解決するコツを思いついて",
-        "家族の{situation}を改善する提案をして",
+        "今日やったことを3つのポイントで簡潔にまとめてください",
+        "最近読んだ本・見た映画・聞いた音楽のうち一つを、友達に勧めるつもりで紹介してください",
+        "今の気分を天気に例えて、その理由も一緒に教えてください",
+        "今週の目標を一つ決めて、それを達成するための具体的な行動を一つ考えてください",
       ],
       "casual": [
-        "{workplace}でのちょっとした不便を解決する工夫を考えて、実行方法も説明して",
-        "{relationship}の関係をより良くする具体的な行動を3つ提案して",
-        "{habit}を続けやすくする仕組みを考えて、心理的な工夫も入れて",
+        "今月の自分を振り返って、成長したと思う点を具体例と一緒に教えてください",
+        "身の回りの問題を一つ挙げて、解決方法を3つのステップで整理してください",
       ],
       "standard": [
-        "{organization}の{challenge}を解決する段階的なアプローチを設計して",
-        "{process}を効率化する革新的な方法を提案して、導入手順も示して",
-        "{community}の{issue}に対する住民参加型の解決策を企画して",
-      ],
-      "creative": [
-        "{industry}の構造的問題を解決する破壊的イノベーションを提案して",
-        "{complex_issue}を異業種のアイデアを応用して解決する方法を考えて",
-        "{stakeholder}全員がWin-Winになる創造的な解決策を設計して",
-      ],
-      "advanced": [
-        "{systemic_problem}を根本から変える社会システムの再設計案を提案して",
-        "{future_challenge}を予防的に解決する統合的フレームワークを構築して",
-        "{global_issue}に対する地域から始められる革新的取り組みを企画して",
-      ],
-    },
-    "企画・イベント系": {
-      "beginner": [
-        "友達の{occasion}を祝う簡単なサプライズを考えて",
-        "{group}で楽しめる{duration}のゲームを考えて、ルールも説明して",
-        "{season}にぴったりの{activity}企画を提案して",
-      ],
-      "casual": [
-        "{community}の{event}を盛り上げる新しい企画を考えて、準備物も含めて",
-        "{target}向けの{theme}ワークショップの内容を設計して、流れも説明して",
-        "{space}を活用した{purpose}イベントのアイデアを提案して",
-      ],
-      "standard": [
-        "{organization}の{goal}を達成するための{period}企画を立案して、効果測定方法も示して",
-        "{issue}への関心を高める参加型イベントを企画して、広報戦略も含めて",
-        "{collaboration}を促進する交流企画を設計して、継続性も考慮して",
-      ],
-      "creative": [
-        "{concept}を体験学習できる没入型イベントを企画して、参加者の変化も設計して",
-        "{boundary}を超えた異色コラボレーション企画を提案して、シナジー効果も説明して",
-        "{technology}を活用した新しい形の{traditional_event}を再構築して",
-      ],
-      "advanced": [
-        "{transformation}を促進する長期的エンゲージメント企画を設計して",
-        "{complex_goal}を達成する多段階プロジェクト企画を立案して、リスク対策も含めて",
-        "{stakeholder}全体の意識変革を促す社会実験的な企画を設計して",
+        "自分の強みを3つ挙げて、それを活かせる場面や活用方法を具体的に考えてください",
+        "コミュニケーションで困った経験を振り返り、より良い対応方法を提案してください",
       ],
     },
   };
@@ -1205,6 +1477,7 @@ const generateVariedTaskPrompt = (
     abstract_concept: ["時の流れ", "心の豊かさ", "つながり", "成長"],
     sense: ["視覚", "聴覚", "触覚", "嗅覚", "味覚"],
     traditional: ["書道", "茶道", "華道", "能楽"],
+    modern: ["デジタルアート", "SNS", "VR", "AI"],
     complex_theme: ["多様性と調和", "持続可能な未来", "人間とテクノロジー"],
     social_issue: ["環境問題", "格差問題", "高齢化", "孤独感"],
     routine: ["準備", "通勤", "食事", "掃除"],
@@ -1251,17 +1524,16 @@ const generateVariedTaskPrompt = (
     "感情表現": "表現・デザイン系",
   };
 
-  const primaryCategory = personalityToCategory[aiPersonality.type] ||
-    "アイデア創出系";
+  const primaryCategory = personalityToCategory[aiPersonality.type] || "アイデア創出系";
 
   // 他のカテゴリもランダムに含める（多様性）
   const allCategories = Object.keys(creativeTasks);
   const categories = [primaryCategory];
-
+  
   // 追加カテゴリを1-2個選択
   const additionalCount = Math.random() < 0.6 ? 1 : 2;
   for (let i = 0; i < additionalCount; i++) {
-    const remaining = allCategories.filter((cat) => !categories.includes(cat));
+    const remaining = allCategories.filter(cat => !categories.includes(cat));
     if (remaining.length > 0) {
       const randomCat = remaining[Math.floor(Math.random() * remaining.length)];
       categories.push(randomCat);
@@ -1269,41 +1541,38 @@ const generateVariedTaskPrompt = (
   }
 
   // タスクパターンを選択
-  const selectedCategory = categories[
-      Math.floor(Math.random() * categories.length)];
-  const tasksByDifficulty = creativeTasks[selectedCategory] ||
-    creativeTasks["アイデア創出系"];
-  const patterns = tasksByDifficulty[selectedDifficultyKey] ||
-    tasksByDifficulty["standard"];
-
+  const selectedCategory = categories[Math.floor(Math.random() * categories.length)];
+  const tasksByDifficulty = creativeTasks[selectedCategory] || creativeTasks["アイデア出し系"];
+  const patterns = tasksByDifficulty[selectedDifficultyKey] || tasksByDifficulty["standard"];
+  
   const basePattern = patterns[Math.floor(Math.random() * patterns.length)];
 
   // 変数を置換
   let finalTaskRequest = basePattern;
-  Object.keys(variables).forEach((key) => {
-    const regex = new RegExp(`{${key}}`, "g");
+  Object.keys(variables).forEach(key => {
+    const regex = new RegExp(`{${key}}`, 'g');
     const values = variables[key];
     const selectedValue = values[Math.floor(Math.random() * values.length)];
     finalTaskRequest = finalTaskRequest.replace(regex, selectedValue);
   });
 
   // 既存履歴との重複チェック・回避
-  const recentRequests = userHistory.slice(0, 5).map((h) => h.request || "");
+  const recentRequests = userHistory.slice(0, 5).map(h => h.request || '');
   let attempts = 0;
   while (attempts < 3) {
-    const similarity = recentRequests.some((recent) => {
-      const commonWords = finalTaskRequest.split("").filter((char) =>
+    const similarity = recentRequests.some(recent => {
+      const commonWords = finalTaskRequest.split('').filter(char => 
         recent.includes(char)).length;
       return commonWords > finalTaskRequest.length * 0.4;
     });
-
+    
     if (!similarity) break;
-
+    
     // 別のパターンを試す
     const newPattern = patterns[Math.floor(Math.random() * patterns.length)];
     finalTaskRequest = newPattern;
-    Object.keys(variables).forEach((key) => {
-      const regex = new RegExp(`{${key}}`, "g");
+    Object.keys(variables).forEach(key => {
+      const regex = new RegExp(`{${key}}`, 'g');
       const values = variables[key];
       const selectedValue = values[Math.floor(Math.random() * values.length)];
       finalTaskRequest = finalTaskRequest.replace(regex, selectedValue);
@@ -1315,7 +1584,7 @@ const generateVariedTaskPrompt = (
   const today = new Date();
   const month = today.getMonth() + 1;
   let seasonalContext = "";
-
+  
   if (month >= 3 && month <= 5) {
     seasonalContext = "春の新しい始まりの季節を意識して、";
   } else if (month >= 6 && month <= 8) {
@@ -1370,9 +1639,8 @@ const generateVariedTaskPrompt = (
     "requiredSkills": ${JSON.stringify(selectedDifficulty.requiredSkills)}
   },
   "category": "${selectedCategory}",
-  "evaluationFocus": ["${aiPersonality.evaluationCriteria.join("\", \"")}"]
+  "evaluationFocus": ["${aiPersonality.evaluationCriteria.join('", "')}"]
 }
 
-**重要**: タスクは人間が現実的に短時間で実行でき、文章で表現できる創造的・
-思考的な内容にしてください。実際の行動や特別な道具が必要なタスクは避けてください。`;
+**重要**: タスクは人間が現実的に短時間で実行でき、文章で表現できる創造的・思考的な内容にしてください。実際の行動や特別な道具が必要なタスクは避けてください。`;
 };
