@@ -1,28 +1,24 @@
-// Firebase Admin SDK で VAPID キーを生成するスクリプト
 const admin = require('firebase-admin');
 
-// サービスアカウントキーファイルのパス（あなたの環境に合わせて調整）
-const serviceAccount = require('./auth_config.json');
-
-admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount),
-  projectId: 'YOUR_PROJECT_ID'
-});
+// Firebase Admin SDKの初期化
+if (!admin.apps.length) {
+  admin.initializeApp({
+    projectId: 'gemiyou'
+  });
+}
 
 async function generateVAPIDKey() {
   try {
-    console.log('🔑 VAPID キーを生成中...');
+    // Firebase プロジェクトの設定情報を取得
+    console.log('🔑 VAPIDキーを生成中...');
     
-    // Firebase Admin SDK の messaging サービスを使用
-    const messaging = admin.messaging();
-    
-    console.log('✅ Firebase Admin SDK 初期化完了');
-    console.log('📋 次のステップ:');
-    console.log('1. Firebase Console にアクセス:');
-    console.log('   https://console.firebase.google.com/');
-    console.log('2. "Web configuration" セクションで "Generate key pair" をクリック');
-    console.log('3. 生成されたキーを .env.local ファイルに追加:');
-    console.log('   REACT_APP_FIREBASE_VAPID_KEY=<生成されたキー>');
+    // VAPIDキーペアを生成（この部分は手動設定が必要）
+    console.log('\n📋 VAPIDキー設定手順:');
+    console.log('1. Firebase Console にアクセス: https://console.firebase.google.com/project/gemiyou/settings/cloudmessaging');
+    console.log('2. "Web プッシュ証明書" タブで "キーペアを生成" をクリック');
+    console.log('3. 生成されたキーを .env ファイルに設定');
+    console.log('\n🔧 .env ファイルに以下を追加:');
+    console.log('REACT_APP_FIREBASE_VAPID_KEY=<生成されたキー>');
     
   } catch (error) {
     console.error('❌ エラー:', error);

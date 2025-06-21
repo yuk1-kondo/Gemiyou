@@ -1,6 +1,3 @@
-/* 🎨 Chatヒューマン - 本動作版スタイル */
-
-/* ベース設定 */
 * {
   box-sizing: border-box;
   margin: 0;
@@ -9,12 +6,11 @@
 
 html, body, #root {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
-  background-color: #fccc00; /* Dick Bruna Yellow */
+  background-color: #fccc00;
   color: #2c3e50;
   height: 100%;
 }
 
-/* アプリコンテナ */
 .app-container {
   min-height: 100vh;
   background-color: #fccc00;
@@ -23,10 +19,9 @@ html, body, #root {
   margin: 0 auto;
 }
 
-/* ヘッダー */
 .app-header {
   text-align: center;
-  background-color: #eb6100; /* Dick Bruna Red */
+  background-color: #eb6100;
   color: white;
   padding: 30px 20px;
   border-radius: 15px;
@@ -45,7 +40,22 @@ html, body, #root {
   opacity: 0.9;
 }
 
-/* メインコンテンツ */
+.notification-button {
+  background: #15722c;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 14px;
+  margin-top: 10px;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.notification-button:hover {
+  transform: scale(1.05);
+}
+
 .main-content {
   display: flex;
   flex-direction: column;
@@ -210,7 +220,128 @@ html, body, #root {
   color: #004c97;
 }
 
-/* レスポンシブ */
+/* タスクカードのクリック機能 */
+.task-card.clickable {
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.task-card.clickable:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  border-color: #ffd700;
+}
+
+.task-card.clickable:active {
+  transform: translateY(-1px);
+}
+
+.click-hint {
+  display: block;
+  color: #0066cc !important;
+  font-weight: 500;
+  margin-top: 5px;
+  opacity: 0.8;
+}
+
+.task-card.clickable:hover .click-hint {
+  opacity: 1;
+  color: #ffd700 !important;
+}
+
+/* 難易度選択セクション */
+.difficulty-selection {
+  margin: 20px 0;
+}
+
+.difficulty-selection h3 {
+  margin-bottom: 10px;
+  color: #333;
+  font-size: 1rem;
+}
+
+.difficulty-buttons {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+
+.difficulty-button {
+  padding: 12px 20px;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  min-width: 100px;
+}
+
+.difficulty-button.beginner {
+  background: linear-gradient(135deg, #4CAF50, #45a049);
+  color: white;
+}
+
+.difficulty-button.intermediate {
+  background: linear-gradient(135deg, #FF9800, #f57c00);
+  color: white;
+}
+
+.difficulty-button.advanced {
+  background: linear-gradient(135deg, #f44336, #d32f2f);
+  color: white;
+}
+
+.difficulty-button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+.difficulty-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.generate-button.random {
+  background: linear-gradient(135deg, #9C27B0, #7B1FA2);
+  margin-top: 10px;
+}
+
+/* ユーザー統計 */
+.user-stats {
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+  margin: 1rem 0;
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  backdrop-filter: blur(10px);
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.stat-value {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #4CAF50;
+}
+
+.stat-label {
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.8);
+  text-align: center;
+}
+
 @media (max-width: 768px) {
   .app-container {
     padding: 15px;
@@ -231,6 +362,18 @@ html, body, #root {
   
   .task-card {
     padding: 15px;
+  }
+  
+  .user-stats {
+    gap: 1rem;
+  }
+  
+  .stat-value {
+    font-size: 1.2rem;
+  }
+  
+  .stat-label {
+    font-size: 0.7rem;
   }
 }
 

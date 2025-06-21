@@ -1,114 +1,127 @@
-import { getMessaging, getToken, onMessage } from 'firebase/messaging';
-import { app } from '../firebase';
-import { doc, setDoc } from 'firebase/firestore';
-import { db } from '../firebase';
-import { getFunctions, httpsCallable } from 'firebase/functions';
+// ローカル通知サービス（Firebase Messaging の代替）
 
-const messaging = getMessaging(app);
-const functions = getFunctions(app);
+import { requestPermissionAndGetToken } from '../firebase';
+import { firestoreService } from './firestoreService';
 
-// VAPID Key - 実際のキーに置き換えてください
-const VAPID_KEY = 'YOUR_VAPID_KEY_HERE';
+export interface NotificationOptions {
+  title: string;
+  body: string;
+  icon?: string;
+  requireInteraction?: boolean;
+}
 
-/**
- * 通知許可を求めてトークンを取得
- */
-export async function requestNotificationPermission(userId: string) {
-  try {
-    console.log('🔔 通知許可を求めています...');
-    
-    const permission = await Notification.requestPermission();
-    
-    if (permission === 'granted') {
-      console.log('✅ 通知許可が得られました');
+class NotificationService {
+  private isSupported: boolean = false;
+  private hasPermission: boolean = false;
+
+  constructor() {
+    this.isSupported = 'Notification' in window;
+    this.hasPermission = this.isSupported && Notification.permission === 'granted';
+  }
+
+  // 通知許可を求める（FCMトークンも取得）
+  async requestPermission(userId?: string): Promise<boolean> {
+    if (!this.isSupported) {
+      console.log('このブラウザは通知をサポートしていません');
+      return false;
+    }
+
+    try {
+      const permission = await Notification.requestPermission();
+      this.hasPermission = permission === 'granted';
       
-      const token = await getToken(messaging, {
-        vapidKey: VAPID_KEY
-      });
-      
-      if (token) {
-        console.log('📱 FCMトークン取得成功:', token);
-        
-        // ユーザーのトークンをFirestoreに保存
-        await setDoc(doc(db, 'users', userId), {
-          fcmToken: token,
-          notificationEnabled: true,
-          updatedAt: new Date().toISOString()
-        }, { merge: true });
-        
-        return token;
-      } else {
-        console.log('❌ FCMトークンの取得に失敗');
+      if (this.hasPermission && userId) {
+        // FCMトークンの取得を試行
+        try {
+          const fcmToken = await requestPermissionAndGetToken();
+          if (fcmToken && fcmToken.length > 20) {
+            // 実際のFCMトークンをFirestoreに保存
+            await firestoreService.updateFCMToken(userId, fcmToken);
+            console.log('✅ FCMトークンを取得・保存しました:', fcmToken.substring(0, 20) + '...');
+          } else {
+            console.log('ℹ️ FCMトークンの取得に失敗しましたが、ローカル通知は利用可能です');
+          }
+        } catch (fcmError) {
+          console.log('ℹ️ FCMトークンの取得に失敗しましたが、ローカル通知は利用可能です:', fcmError);
+        }
       }
       
-    } else {
-      console.log('❌ 通知許可が拒否されました');
+      return this.hasPermission;
+    } catch (error) {
+      console.error('通知許可の取得に失敗:', error);
+      return false;
     }
-    
-  } catch (error) {
-    console.error('❌ 通知許可エラー:', error);
   }
-}
 
-/**
- * フォアグラウンド通知の設定
- */
-export function setupForegroundNotifications() {
-  onMessage(messaging, (payload) => {
-    console.log('📨 フォアグラウンドでメッセージを受信:', payload);
-    
-    if (payload.notification) {
-      showCustomNotification(payload.notification);
+  // 通知を送信
+  async sendNotification(options: NotificationOptions): Promise<boolean> {
+    if (!this.hasPermission) {
+      const granted = await this.requestPermission();
+      if (!granted) return false;
     }
-  });
-}
 
-/**
- * カスタム通知表示
- */
-function showCustomNotification(notification: any) {
-  // ブラウザ通知を表示
-  if ('Notification' in window && Notification.permission === 'granted') {
-    new Notification(notification.title || 'Gemiyou', {
-      body: notification.body,
-      icon: '/icon-192x192.png',
-      badge: '/icon-192x192.png',
-      tag: 'gemiyou-task',
-      requireInteraction: true
+    try {
+      const notification = new Notification(options.title, {
+        body: options.body,
+        icon: options.icon || '/logo192.png',
+        badge: '/logo192.png',
+        requireInteraction: options.requireInteraction || false,
+        tag: 'gemiyou-task', // 重複通知を防ぐ
+      });
+
+      // クリック時の動作
+      notification.onclick = () => {
+        window.focus();
+        notification.close();
+      };
+
+      // 5秒後に自動で閉じる
+      setTimeout(() => {
+        notification.close();
+      }, 5000);
+
+      return true;
+    } catch (error) {
+      console.error('通知の送信に失敗:', error);
+      return false;
+    }
+  }
+
+  // タスク生成通知
+  async notifyNewTask(aiName: string, taskContent: string): Promise<boolean> {
+    return this.sendNotification({
+      title: `🧠 ${aiName}からの依頼`,
+      body: taskContent.length > 60 ? 
+        taskContent.substring(0, 57) + '...' : 
+        taskContent,
+      requireInteraction: true,
     });
   }
-  
-  console.log('🎯 新しいタスク通知:', notification);
-}
 
-/**
- * 新しい動的タスクを生成してリクエスト
- */
-export async function requestNewTask(difficulty: string = 'beginner', userId?: string) {
-  try {
-    const createDynamicTask = httpsCallable(functions, 'createDynamicTask');
-    const result = await createDynamicTask({ difficulty, userId });
-    
-    console.log('✅ 新しい動的タスクをリクエストしました:', result.data);
-    return result.data;
-  } catch (error) {
-    console.error('❌ 動的タスクリクエストエラー:', error);
-    throw error;
+  // 定期的な通知（デモ用）
+  async scheduleDemo(): Promise<void> {
+    if (!this.hasPermission) {
+      await this.requestPermission();
+    }
+
+    // 5秒後にデモ通知
+    setTimeout(() => {
+      this.sendNotification({
+        title: '🎲 新しいタスクの時間です！',
+        body: 'AIがあなたのための創造的なタスクを用意しました',
+        requireInteraction: true,
+      });
+    }, 5000);
+  }
+
+  // 通知状態の確認
+  getStatus(): { isSupported: boolean; hasPermission: boolean; permissionState: string } {
+    return {
+      isSupported: this.isSupported,
+      hasPermission: this.hasPermission,
+      permissionState: this.isSupported ? Notification.permission : 'not-supported',
+    };
   }
 }
 
-/**
- * タスクの回答を評価してもらう
- */
-export async function evaluateTaskResponse(taskId: string, userResponse: string) {
-  try {
-    const evaluateResponse = httpsCallable(functions, 'evaluateTaskResponse');
-    const result = await evaluateResponse({ taskId, userResponse });
-    
-    console.log('✅ タスク評価完了:', result.data);
-    return result.data;
-  } catch (error) {
-    console.error('❌ タスク評価エラー:', error);
-    throw error;
-  }
-}
+export const notificationService = new NotificationService();

@@ -16,8 +16,11 @@ const genAI = new GoogleGenerativeAI(
 
 // FCM Notification Helper Functions
 const sendNotificationToUser = async (fcmToken, title, body, data = {}) => {
-  if (!fcmToken) {
-    logger.warn("FCM token is null, skipping notification");
+  // FCMトークンが無効または空の場合はスキップ
+  if (!fcmToken || 
+      fcmToken === 'notification-enabled' || 
+      fcmToken.length < 20) {
+    logger.warn("FCM token is invalid or placeholder, skipping notification");
     return;
   }
 
@@ -35,7 +38,12 @@ const sendNotificationToUser = async (fcmToken, title, body, data = {}) => {
     logger.info("Notification sent successfully:", response);
     return response;
   } catch (error) {
-    logger.error("Error sending notification:", error);
+    if (error.code === 'messaging/invalid-argument' || 
+        error.code === 'messaging/registration-token-not-registered') {
+      logger.warn(`Invalid FCM token detected: ${fcmToken.substring(0, 20)}...`);
+    } else {
+      logger.error("Error sending notification:", error);
+    }
     return null;
   }
 };
@@ -44,16 +52,25 @@ const getAllActiveUsers = async () => {
   try {
     const usersSnapshot = await db.collection("users").get();
     const users = [];
+    
+    logger.info(`Found ${usersSnapshot.size} total users in Firestore`);
+    
     usersSnapshot.forEach((doc) => {
       const userData = doc.data();
-      if (userData.fcmToken) {
+      logger.info(`User ${doc.id}: createdAt=${userData.createdAt}, fcmToken=${userData.fcmToken ? 'exists' : 'none'}`);
+      
+      // 登録されたユーザーをアクティブユーザーとする（FCMトークンは任意）
+      if (userData.createdAt) {
         users.push({
           userId: doc.id,
-          fcmToken: userData.fcmToken,
+          fcmToken: userData.fcmToken || null,
           lastActive: userData.lastActive,
+          notificationsEnabled: userData.notificationsEnabled || false,
         });
       }
     });
+    
+    logger.info(`Found ${users.length} active users with createdAt field`);
     return users;
   } catch (error) {
     logger.error("Error getting active users:", error);
@@ -205,75 +222,47 @@ const AI_PERSONALITIES = [
 const taskGenerationPrompts = {
   beginner: {
     themes: [
-      "日常生活のアイデア出し",
-      "簡単な壁打ち・相談",
-      "3行程度の短い物語創作",
-      "今日の振り返り・要約",
-      "身近な話題での発想"
+      "日常×発見",
+      "今日×小さな冒険", 
+      "身近なもの×新しい視点",
+      "記憶×感情",
+      "日常×創造"
     ],
     instructions: `
-初心者レベルの簡単で親しみやすいタスクを1つ生成してください。
-以下の条件を満たすタスクにしてください：
-- 1〜3行程度で回答できる
-- 専門知識不要
-- 日常的で身近な話題
-- 気軽に取り組める内容
-- アイデア出し、壁打ち、簡単な創作、要約のいずれか
-
-例：
-- 今日の夕食メニューを3つ提案してください
-- 最近気になっていることを教えてください  
-- 雨の日の小さな冒険を3行で書いてください
-- 今日やったことを3つのポイントでまとめてください
-`
+・1〜3行程度で回答できるタスクを作成  
+・専門知識不要、気軽に取り組める内容  
+・必ず動詞から始める  
+・参加者の日常体験を引き出す`
   },
   
   intermediate: {
     themes: [
-      "詳細なアイデア企画",
-      "深い相談・壁打ち",
-      "構造化された創作",
-      "分析・整理タスク",
-      "体験談の共有"
+      "体験×洞察",
+      "アイデア×実現", 
+      "価値観×表現",
+      "過去×未来",
+      "感情×言語化"
     ],
     instructions: `
-中級レベルの少し考える要素があるタスクを1つ生成してください。
-以下の条件を満たすタスクにしてください：
-- 5〜10行程度で回答できる
-- 少し詳しく考える必要がある
-- 個人的な体験や意見を求める
-- 創意工夫の余地がある内容
-
-例：
-- 友達を驚かせるサプライズアイデアを考えて説明してください
-- 将来やってみたいことの最初の一歩を考えてください
-- 好きな色から連想される物語設定を作ってください
-- 今月の成長点を具体例と共に教えてください
-`
+・5〜10行程度で回答できるタスクを作成  
+・少し考える要素を含む  
+・必ず動詞から始める  
+・個人的な体験や意見を深く掘り下げる`
   },
   
   advanced: {
     themes: [
-      "複合的な企画・提案",
-      "価値観の深掘り",
-      "構造化された創作",
-      "問題解決・分析",
-      "総合的な振り返り"
+      "複合的思考×構造化",
+      "価値観×人生設計", 
+      "問題解決×創造性",
+      "体験×哲学",
+      "社会×個人"
     ],
     instructions: `
-上級レベルの考える要素が多いタスクを1つ生成してください。
-以下の条件を満たすタスクにしてください：
-- 10行以上で回答できる
-- 複数の要素を組み合わせて考える
-- 体系的・構造的な回答を求める
-- 個人の価値観や経験を深く掘り下げる
-
-例：
-- 地域活性化イベントを企画して詳細を説明してください
-- 人生で大切な価値観を体験談と共に説明してください
-- 記憶に残る風景を五感で描写してください
-- 自分の強みを活かす方法を具体的に考えてください
-`
+・10行以上で回答できるタスクを作成  
+・複数の要素を組み合わせて考える  
+・必ず動詞から始める  
+・体系的・構造的な思考を促す`
   }
 };
 
@@ -282,32 +271,27 @@ async function generateTaskWithGemini(difficulty, aiPersonality) {
   const promptConfig = taskGenerationPrompts[difficulty];
   const randomTheme = promptConfig.themes[Math.floor(Math.random() * promptConfig.themes.length)];
   
-  const prompt = `
-あなたは「${aiPersonality.name}」として、以下の条件でタスクを1つ生成してください。
+  const prompt = `📝 ChatHuman Task Generator
 
-【あなたの特徴】
-${aiPersonality.personality}
-専門分野: ${aiPersonality.expertise.join(", ")}
+あなたは **「${aiPersonality.name}」** として振る舞います。  
+専門分野: ${aiPersonality.expertise.join(", ")}  
 重視する点: ${aiPersonality.evaluationCriteria.join(", ")}
 
-【タスク生成条件】
-難易度: ${difficulty}
-テーマ: ${randomTheme}
+▼ タスク生成条件
+・難易度: ${difficulty}  
+・テーマ: ${randomTheme}  
 ${promptConfig.instructions}
 
-【重要】
-- ${aiPersonality.name}らしい視点や言葉遣いでタスクを作成
-- 人間が楽しく取り組める内容にする
-- 創造性を刺激する要素を含める
-- 答えに正解・不正解がないオープンな質問にする
+▼ 必須要件
+1. ${aiPersonality.name} らしい語り口を使う  
+2. 人間が **楽しく** 取り組めるオープン課題にする  
+3. 正解・不正解を設けない  
+4. **出力は JSON で "task" 1 キーのみ**（ヒント・期待キーは不要）
 
-以下のJSON形式で1つのタスクを返してください：
+▼ 出力形式
 {
-  "task": "具体的なタスク内容（1文〜2文）",
-  "hint": "取り組むヒントや視点（1文）",
-  "expectation": "どんな回答を期待しているか（1文）"
-}
-`;
+  "task": "具体的なタスク内容（1〜2 文）"
+}`;
 
   try {
     const model = genAI.getGenerativeModel({model: "gemini-1.5-flash"});
@@ -323,8 +307,8 @@ ${promptConfig.instructions}
     
     return {
       content: taskData.task,
-      hint: taskData.hint,
-      expectation: taskData.expectation,
+      hint: null, // Minimalバージョンではヒントは生成しない
+      expectation: null, // Minimalバージョンでは期待値は生成しない
       generatedAt: new Date().toISOString()
     };
   } catch (error) {
@@ -339,8 +323,8 @@ ${promptConfig.instructions}
     
     return {
       content: fallbackTasks[difficulty],
-      hint: "自分らしく、素直に答えてみてください。",
-      expectation: "あなたの個性や体験が感じられる回答を期待しています。",
+      hint: null,
+      expectation: null,
       generatedAt: new Date().toISOString()
     };
   }
@@ -348,63 +332,171 @@ ${promptConfig.instructions}
 
 // 簡単な評価関数
 async function evaluateChatResponse(taskContent, userResponse, difficulty) {
-  const prompt = `
-タスク: ${taskContent}
-ユーザーの回答: ${userResponse}
-難易度: ${difficulty}
-
-以下の基準で評価してください（各項目5点満点）：
-
-1. 取り組み姿勢（5点）
-   - タスクに対して真摯に取り組んでいるか
-   - 自分なりに考えて答えているか
-
-2. 内容の充実度（5点）
-   - 求められた内容に答えているか
-   - 具体性や詳細さは適切か
-
-3. 創意工夫（5点）
-   - 独自性や個性が感じられるか
-   - 面白い視点や発想があるか
-
-評価基準：
-- 難しく考えすぎず、素直な回答を高く評価
-- 完璧でなくても、本人なりの工夫があれば評価
-- 短い回答でも、心がこもっていれば良し
-- アイデア系は実現可能性より発想力を重視
-- 壁打ち系は正解不正解ではなく、自分らしさを評価
-
-必ず以下のJSON形式で返してください：
-{
-  "score": 総合点（15点満点）,
-  "feedback": "優しく具体的なフィードバック（100字程度）",
-  "encouragement": "次回への励ましの言葉（50字程度）",
-  "breakdown": {
-    "attitude": 取り組み姿勢の点数,
-    "content": 内容充実度の点数,
-    "creativity": 創意工夫の点数
+  // APIキーの確認
+  if (!process.env.GEMINI_API_KEY) {
+    logger.error('❌ GEMINI_API_KEY が設定されていません');
+    throw new Error('GEMINI_API_KEY not configured');
   }
-}`;
+  
+  logger.info('✅ GEMINI_API_KEY 確認済み (長さ:', process.env.GEMINI_API_KEY.length, ')');
+  
+  const prompt = `
+# ChatHuman 評価プロンプト（Final v3.1 - AI依頼者モード）
+
+## 依頼内容
+${taskContent}
+
+## あなたの回答
+${userResponse}
+
+## 難易度
+${difficulty}
+
+---
+あなたは**AI依頼者**として、このタスクを人間に依頼した立場です。
+回答を受け取った依頼者として、率直な感想とアドバイスをしてください。
+
+## 評価基準（必ず0-100点の整数）
+
+### 1. 取り組み姿勢（0-100点）
+- 私の依頼に真剣に向き合ってくれたか
+- 自分なりに考えて答えてくれたか
+
+### 2. 内容の充実度（0-100点）  
+- 私が求めていた内容に応えてくれたか
+- 具体性や詳細さは十分か
+
+### 3. 創意工夫（0-100点）
+- 私が想像していた以上の工夫があったか
+- 独自性や個性が感じられるか
+
+## **絶対ルール**
+- **各項目は0から100の整数のみ**
+- **総合点も0から100の整数のみ**
+- **100を超える数値は絶対に使用禁止**
+- **小数点は使用禁止**
+
+## フィードバックの書き方（依頼者目線）
+- **冒頭**: 「〜してくれて嬉しい！」「〜が良かった！」
+- **中間**: 「もっと〜して欲しかった」「次は〜してくれると嬉しい」
+- **最後**: 「次回も期待しています！」的な依頼者らしい締め
+- **口調**: 親しみやすく、でも依頼者として
+
+## 点数の目安（厳格に守る）
+- 期待以上: 80-90点
+- 期待通り: 60-75点  
+- 普通: 40-55点
+- 物足りない: 20-35点
+- 不十分: 10-15点
+
+## 出力形式（数値は必ず0-100の整数）
+{
+  "score": 総合点（0-100の整数、小数点禁止）,
+  "feedback": "依頼者として率直な感想とアドバイス（100字程度、もっと〜して欲しい系の表現を含む）",
+  "encouragement": "次回への期待を込めた依頼者らしい一言（50字程度）",
+  "breakdown": {
+    "attitude": 取り組み姿勢（0-100の整数）,
+    "content": 内容充実度（0-100の整数）,
+    "creativity": 創意工夫（0-100の整数）
+  }
+}
+
+**重要**: 数値は必ず0-100の範囲の整数。小数点や100超えは絶対禁止。`;
 
   try {
+    logger.info('🤖 Gemini API評価開始:', {
+      taskContentLength: taskContent?.length,
+      userResponseLength: userResponse?.length,
+      difficulty,
+      hasApiKey: !!process.env.GEMINI_API_KEY,
+      apiKeyLength: process.env.GEMINI_API_KEY?.length
+    });
+    
+    logger.info('📝 評価プロンプト（一部）:', prompt.substring(0, 300) + '...');
+    
     const model = genAI.getGenerativeModel({model: "gemini-1.5-flash"});
+    
+    logger.info('🔄 Gemini API呼び出し実行中...');
     const result = await model.generateContent(prompt);
     const responseText = result.response.text();
     
-    const jsonMatch = responseText.match(/\{[\s\S]*\}/);
+    logger.info('✅ Gemini API応答受信:', {
+      responseLength: responseText.length,
+      responsePreview: responseText.substring(0, 200) + '...'
+    });
+    
+    logger.info('🤖 Gemini API生レスポンス:', responseText);
+    
+    // JSONブロックを抽出（```json を含む場合も考慮）
+    let jsonMatch = responseText.match(/```json\s*\n([\s\S]*?)\n```/);
     if (!jsonMatch) {
+      // 直接のJSONを探す
+      jsonMatch = responseText.match(/\{[\s\S]*?\}/);
+    }
+    
+    if (!jsonMatch) {
+      logger.error('❌ JSON抽出失敗:', responseText);
       throw new Error("Invalid JSON response from AI evaluation");
     }
     
-    return JSON.parse(jsonMatch[0]);
-  } catch (error) {
-    logger.error('評価エラー:', error);
-    return {
-      score: 12,
-      feedback: "お疲れさまでした！あなたなりに一生懸命取り組んでくれたことが伝わってきます。",
-      encouragement: "次回も気軽に挑戦してくださいね！",
-      breakdown: { attitude: 4, content: 4, creativity: 4 }
+    const jsonString = jsonMatch[1] || jsonMatch[0]; // ```json形式の場合は[1]、直接の場合は[0]
+    logger.info('🔍 JSON抽出成功:', jsonString);
+    
+    let evaluationData;
+    try {
+      evaluationData = JSON.parse(jsonString);
+    } catch (parseError) {
+      logger.error('❌ JSONパースエラー:', parseError.message);
+      logger.error('❌ パース対象文字列:', jsonString);
+      throw new Error("Failed to parse AI evaluation JSON");
+    }
+    
+    logger.info('🔍 パース成功 元データ:', evaluationData);
+    
+    // 厳格な点数制限（整数のみ、0-100範囲）
+    const clampScore = (score) => {
+      const numScore = parseInt(score);
+      if (isNaN(numScore)) return 50; // デフォルト値
+      return Math.max(0, Math.min(100, numScore));
     };
+    
+    const clampedData = {
+      score: clampScore(evaluationData.score),
+      feedback: evaluationData.feedback || "お疲れさまでした！",
+      encouragement: evaluationData.encouragement || "次回も頑張ってください！",
+      breakdown: {
+        attitude: clampScore(evaluationData.breakdown?.attitude),
+        content: clampScore(evaluationData.breakdown?.content),
+        creativity: clampScore(evaluationData.breakdown?.creativity)
+      }
+    };
+
+    logger.info('🔍 最終評価データ:', clampedData);
+
+    // デバッグログ：範囲外数値の検出
+    if (evaluationData.score > 100 || evaluationData.score < 0) {
+      logger.warn(`範囲外スコア検出: ${evaluationData.score} → ${clampedData.score}に修正`);
+    }
+
+    return clampedData;
+  } catch (error) {
+    logger.error('❌ 評価関数エラー詳細:', {
+      error: error.message,
+      stack: error.stack,
+      taskContentLength: taskContent?.length,
+      userResponseLength: userResponse?.length
+    });
+    
+    // フォールバック評価を返す
+    const fallbackEvaluation = {
+      score: 50, // より低めのフォールバックスコア
+      feedback: "システムエラーのため評価を完了できませんでした。再度お試しください。",
+      encouragement: "次回もチャレンジしてください！",
+      breakdown: { attitude: 50, content: 45, creativity: 50 }
+    };
+    
+    logger.info('🔄 フォールバック評価を返却:', fallbackEvaluation);
+    return fallbackEvaluation;
   }
 }
 
@@ -428,6 +520,10 @@ exports.createDynamicTask = onRequest(async (req, res) => {
     }
 
     const { difficulty = 'beginner', userId } = req.body;
+
+    // デバッグログ: 受信した難易度を確認
+    logger.info('🎯 受信した難易度:', difficulty);
+    logger.info('🔍 リクエストボディ:', req.body);
 
     // ランダムにAI人格を選択
     const randomPersonality = AI_PERSONALITIES[Math.floor(Math.random() * AI_PERSONALITIES.length)];
@@ -481,7 +577,17 @@ exports.createDynamicTask = onRequest(async (req, res) => {
       message: `${randomPersonality.name}から新しいタスクが届きました！`,
       task: {
         id: taskRef.id,
-        ...taskData,
+        content: generatedTask.content,
+        question: generatedTask.content, // 旧形式との互換性
+        genre: randomPersonality.name,
+        aiPersonality: randomPersonality,
+        difficulty: difficulty,
+        hint: generatedTask.hint,
+        expectation: generatedTask.expectation,
+        status: 'pending',
+        chatHistory: [],
+        isCompleted: false,
+        evaluation: null,
         createdAt: new Date().toISOString()
       }
     });
@@ -512,14 +618,22 @@ exports.evaluateTaskResponse = onRequest(async (req, res) => {
     }
 
     const { taskId, userResponse } = req.body;
+    
+    logger.info('🔍 評価API呼び出し:', { taskId, userResponse: userResponse?.substring(0, 100) + '...' });
 
     // タスクデータを取得
     const taskDoc = await db.collection('tasks').doc(taskId).get();
     if (!taskDoc.exists) {
+      logger.error('❌ タスクが見つかりません:', taskId);
       return res.status(404).json({ error: 'タスクが見つかりません' });
     }
 
     const taskData = taskDoc.data();
+    logger.info('🔍 取得したタスクデータ:', {
+      content: taskData.content,
+      difficulty: taskData.difficulty,
+      aiPersonality: taskData.aiPersonality?.name
+    });
     
     // AI評価を実行
     const evaluation = await evaluateChatResponse(
@@ -527,12 +641,14 @@ exports.evaluateTaskResponse = onRequest(async (req, res) => {
       userResponse,
       taskData.difficulty
     );
+    
+    logger.info('🔍 AI評価結果:', evaluation);
 
     // チャット履歴に追加
     const chatMessage = {
       sender: 'user',
       content: userResponse,
-      timestamp: admin.firestore.FieldValue.serverTimestamp(),
+      timestamp: new Date().toISOString(),  // serverTimestamp() の代わりに現在日時を使用
       evaluation: evaluation
     };
 
@@ -540,8 +656,8 @@ exports.evaluateTaskResponse = onRequest(async (req, res) => {
     await db.collection('tasks').doc(taskId).update({
       chatHistory: admin.firestore.FieldValue.arrayUnion(chatMessage),
       lastUpdate: admin.firestore.FieldValue.serverTimestamp(),
-      status: evaluation.score >= 10 ? 'completed' : 'in_progress',
-      isCompleted: evaluation.score >= 10,
+      status: evaluation.score >= 70 ? 'completed' : 'in_progress', // 70点以上で完了
+      isCompleted: evaluation.score >= 70,
       evaluation: evaluation
     });
 
@@ -558,7 +674,7 @@ exports.evaluateTaskResponse = onRequest(async (req, res) => {
 });
 
 // Generate AI Task Function (Scheduled) - Individual User Notifications
-exports.generateAITask = onSchedule("every 30 minutes", async (event) => {
+exports.generateAITask = onSchedule("every 5 minutes", async (event) => {
   try {
     logger.info("Starting individual AI task generation...");
 

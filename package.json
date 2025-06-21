@@ -1,8 +1,7 @@
 {
-  "name": "chat-human",
+  "name": "gemiyou",
   "version": "0.1.0",
   "private": true,
-  "homepage": "https://yuk1-kondo.github.io/Gemiyou",
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
     "@testing-library/dom": "^10.4.0",
@@ -14,8 +13,6 @@
     "@types/react": "^19.1.8",
     "@types/react-dom": "^19.1.6",
     "firebase": "^11.9.1",
-    "firebase-admin": "^13.4.0",
-    "node-fetch": "^3.3.2",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "react-scripts": "5.0.1",

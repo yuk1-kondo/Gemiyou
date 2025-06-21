@@ -1,6 +1,6 @@
 {
-  "short_name": "🧠 AIタスク",
-  "name": "AI タスク生成・評価システム",
+  "short_name": "🧠 Gemiyou",
+  "name": "Gemiyou - あなたがAIのタスクをするサービス",
   "icons": [
     {
       "src": "favicon.ico",
