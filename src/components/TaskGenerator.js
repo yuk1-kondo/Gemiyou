@@ -1,0 +1,244 @@
+import { useState, useEffect } from 'react';
+import { geminiService } from '../services/geminiService';
+import { firestoreService } from '../services/firestoreService';
+import './TaskGenerator.css';
+
+const TaskGenerator = ({ user }) => {
+  // デバッグ: サービスが正しくインポートされているかチェック
+  console.log('🔍 geminiService:', geminiService);
+  console.log('🔍 firestoreService:', firestoreService);
+  console.log('🔍 firestoreService.saveTaskResponse:', firestoreService?.saveTaskResponse);
+  
+  const [selectedDifficulty, setSelectedDifficulty] = useState('beginner');
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [currentTask, setCurrentTask] = useState(null);
+  const [userStats, setUserStats] = useState({ totalTasks: 0, completedToday: 0, totalScore: 0 });
+  const [response, setResponse] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    const loadStats = async () => {
+      if (user) {
+        const stats = await firestoreService.getUserStats(user.uid);
+        setUserStats(stats);
+      }
+    };
+    loadStats();
+  }, [user]);
+
+  const refreshUserStats = async () => {
+    if (user) {
+      const stats = await firestoreService.getUserStats(user.uid);
+      setUserStats(stats);
+    }
+  };
+
+  const generateTask = async (difficulty = selectedDifficulty) => {
+    setIsGenerating(true);
+    try {
+      console.log('タスク生成開始:', { difficulty, userId: user?.uid });
+      const task = await geminiService.generateTaskWithCloudFunction(user?.uid, difficulty);
+      console.log('生成されたタスク:', task);
+      
+      // Cloud Functionsからのレスポンス形式に合わせて調整
+      const processedTask = {
+        id: task.id,
+        title: `${task.genre}からの依頼`,
+        description: task.content || task.question || '',
+        requirements: task.hint ? [task.hint] : (task.expectation ? [task.expectation] : []),
+        difficulty: task.difficulty || difficulty,
+        genre: task.genre || task.aiPersonality?.name || 'AI',
+        expectation: task.expectation,
+        originalTask: task // 元のタスクデータも保持
+      };
+      
+      setCurrentTask(processedTask);
+      setResponse('');
+    } catch (error) {
+      console.error('タスク生成エラー:', error);
+      alert('タスク生成に失敗しました: ' + error.message);
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
+  const submitResponse = async () => {
+    if (!currentTask || !response.trim()) return;
+
+    setIsSubmitting(true);
+    try {
+      // サービスの存在チェック
+      if (!firestoreService) {
+        throw new Error('firestoreService が初期化されていません');
+      }
+      
+      if (!firestoreService.saveTaskResponse) {
+        throw new Error('firestoreService.saveTaskResponse メソッドが存在しません');
+      }
+      
+      if (!geminiService) {
+        throw new Error('geminiService が初期化されていません');
+      }
+      
+      if (!geminiService.evaluateResponse) {
+        throw new Error('geminiService.evaluateResponse メソッドが存在しません');
+      }
+      
+      // 正しいタスクIDを取得（Cloud Functionsから返されたもの）
+      const taskId = currentTask.originalTask?.id || currentTask.id;
+      
+      console.log('回答送信開始:', { 
+        taskId, 
+        response: response.substring(0, 50) + '...',
+        firestoreService: !!firestoreService,
+        geminiService: !!geminiService
+      });
+      
+      // 回答を評価
+      const evaluation = await geminiService.evaluateResponse(taskId, response);
+      
+      // Firestoreに保存
+      const saved = await firestoreService.saveTaskResponse(
+        taskId,
+        user.uid,
+        response,
+        evaluation
+      );
+
+      if (saved) {
+        alert(`評価完了！\nスコア: ${evaluation.score}点\n${evaluation.feedback}`);
+        
+        // 統計を更新
+        await refreshUserStats();
+        
+        // タスクをクリア
+        setCurrentTask(null);
+        setResponse('');
+      } else {
+        alert('回答の保存に失敗しました。もう一度お試しください。');
+      }
+    } catch (error) {
+      console.error('❌ 回答送信エラー:', error);
+      console.error('❌ エラースタック:', error.stack);
+      alert('回答の送信に失敗しました: ' + error.message);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  return (
+    <div className="task-generator">
+      {/* Chat機能セクション */}
+      <div className="chat-section">
+        <div className="chat-header">
+          <span className="chat-icon">🧠</span>
+          <h2>Chat ヒューマン</h2>
+        </div>
+        <p className="chat-subtitle">AIがあなたに創造的なタスクを提案します</p>
+      </div>
+
+      {/* タスク生成セクション */}
+      <div className="task-section">
+        <div className="task-header">
+          <span className="task-icon">🎯</span>
+          <h3>新しいタスクを生成</h3>
+        </div>
+        
+        <div className="difficulty-section">
+          <p>難易度を選択:</p>
+          <div className="difficulty-buttons">
+            <button 
+              className={`difficulty-btn beginner ${selectedDifficulty === 'beginner' ? 'active' : ''}`}
+              onClick={() => setSelectedDifficulty('beginner')}
+            >
+              初級
+            </button>
+            <button 
+              className={`difficulty-btn intermediate ${selectedDifficulty === 'intermediate' ? 'active' : ''}`}
+              onClick={() => setSelectedDifficulty('intermediate')}
+            >
+              <span>🌿</span> 中級
+            </button>
+            <button 
+              className={`difficulty-btn advanced ${selectedDifficulty === 'advanced' ? 'active' : ''}`}
+              onClick={() => setSelectedDifficulty('advanced')}
+            >
+              <span>🔥</span> 上級
+            </button>
+          </div>
+        </div>
+
+        <button 
+          className="random-task-btn"
+          onClick={() => generateTask()}
+          disabled={isGenerating}
+        >
+          <span>🎲</span> 
+          {isGenerating ? 'タスク生成中...' : 'ランダムタスクを生成'}
+        </button>
+      </div>
+
+      {/* 現在のタスク表示 */}
+      {currentTask && (
+        <div className="current-task">
+          <h3>📝 現在のタスク</h3>
+          <div className="task-content">
+            <div className="task-meta">
+              <span className="task-genre">🎭 {currentTask.genre}</span>
+              <span className="task-difficulty">📊 {currentTask.difficulty}</span>
+            </div>
+            <h4>{currentTask.title}</h4>
+            <p>{currentTask.description}</p>
+            {currentTask.requirements && currentTask.requirements.length > 0 && (
+              <div className="requirements">
+                <h5>💡 ヒント・要件:</h5>
+                <ul>
+                  {currentTask.requirements.map((req, index) => (
+                    <li key={index}>{req}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+          
+          <div className="response-section">
+            <textarea
+              value={response}
+              onChange={(e) => setResponse(e.target.value)}
+              placeholder="ここにあなたの回答を入力してください..."
+              rows={6}
+            />
+            <button 
+              className="submit-btn"
+              onClick={submitResponse}
+              disabled={!response.trim() || isSubmitting}
+            >
+              {isSubmitting ? '送信中...' : '回答を送信'}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* ユーザー統計 */}
+      <div className="user-stats">
+        <div className="stats-row">
+          <span className="stats-icon">👤</span>
+          <span>ユーザー: {user?.displayName || user?.email?.split('@')[0] || 'user-175...'}</span>
+        </div>
+        <div className="stats-row">
+          <span className="stats-icon">📊</span>
+          <span>生成済みタスク数: {userStats.totalTasks}</span>
+          <span className="separator">|</span>
+          <span className="stats-icon">🏆</span>
+          <span>累計得点: {userStats.totalScore}点</span>
+        </div>
+        <div className="stats-row">
+          <span className="stats-icon">🎯</span>
+          <span>今日の完了数: {userStats.completedToday}</span>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default TaskGenerator;

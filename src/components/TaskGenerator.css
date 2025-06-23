@@ -1,0 +1,285 @@
+.task-generator {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 20px;
+  background: #f8b500;
+  min-height: 100vh;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Chat セクション */
+.chat-section {
+  background: linear-gradient(135deg, #ff6b35, #ff8e53);
+  border-radius: 16px;
+  padding: 24px;
+  margin-bottom: 20px;
+  color: white;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.chat-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.chat-icon {
+  font-size: 24px;
+}
+
+.chat-header h2 {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.chat-subtitle {
+  margin: 0;
+  opacity: 0.9;
+  font-size: 14px;
+}
+
+/* タスク生成セクション */
+.task-section {
+  background: white;
+  border-radius: 16px;
+  padding: 24px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.task-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.task-icon {
+  font-size: 20px;
+}
+
+.task-header h3 {
+  margin: 0;
+  font-size: 18px;
+  color: #333;
+}
+
+.difficulty-section p {
+  margin: 0 0 12px 0;
+  font-weight: 500;
+  color: #555;
+}
+
+.difficulty-buttons {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.difficulty-btn {
+  flex: 1;
+  padding: 12px 16px;
+  border: 2px solid transparent;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.difficulty-btn.beginner {
+  background: #4caf50;
+  color: white;
+}
+
+.difficulty-btn.intermediate {
+  background: #ff9800;
+  color: white;
+}
+
+.difficulty-btn.advanced {
+  background: #f44336;
+  color: white;
+}
+
+.difficulty-btn.active {
+  border-color: #333;
+  transform: scale(1.05);
+}
+
+.random-task-btn {
+  width: 100%;
+  background: linear-gradient(135deg, #8e2de2, #4a00e0);
+  color: white;
+  border: none;
+  padding: 16px 24px;
+  border-radius: 25px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.random-task-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(142, 45, 226, 0.3);
+}
+
+.random-task-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+/* 現在のタスク */
+.current-task {
+  background: white;
+  border-radius: 16px;
+  padding: 24px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.current-task h3 {
+  margin: 0 0 16px 0;
+  color: #333;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.task-content {
+  margin-bottom: 20px;
+}
+
+.task-meta {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.task-genre, .task-difficulty {
+  background: #f0f0f0;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  color: #666;
+  font-weight: 500;
+}
+
+.task-content h4 {
+  margin: 0 0 12px 0;
+  color: #2c3e50;
+  font-size: 18px;
+}
+
+.task-content p {
+  margin: 0 0 16px 0;
+  color: #555;
+  line-height: 1.5;
+}
+
+.requirements h5 {
+  margin: 0 0 8px 0;
+  color: #333;
+}
+
+.requirements ul {
+  margin: 0;
+  padding-left: 20px;
+}
+
+.requirements li {
+  margin-bottom: 4px;
+  color: #555;
+}
+
+.response-section textarea {
+  width: 100%;
+  padding: 16px;
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 14px;
+  resize: vertical;
+  margin-bottom: 12px;
+  box-sizing: border-box;
+}
+
+.response-section textarea:focus {
+  outline: none;
+  border-color: #4a00e0;
+}
+
+.submit-btn {
+  background: #28a745;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.submit-btn:hover:not(:disabled) {
+  background: #218838;
+  transform: translateY(-1px);
+}
+
+.submit-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ユーザー統計 */
+.user-stats {
+  background: rgba(255, 255, 255, 0.9);
+  padding: 16px 20px;
+  border-radius: 12px;
+  font-size: 14px;
+  color: #333;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.stats-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.stats-row:last-child {
+  margin-bottom: 0;
+}
+
+.stats-icon {
+  font-size: 16px;
+}
+
+.separator {
+  color: #999;
+}
+
+/* レスポンシブ */
+@media (max-width: 480px) {
+  .task-generator {
+    padding: 12px;
+  }
+  
+  .difficulty-buttons {
+    flex-direction: column;
+  }
+  
+  .chat-actions {
+    flex-direction: column;
+  }
+}
