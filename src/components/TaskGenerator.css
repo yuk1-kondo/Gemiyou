@@ -2,7 +2,7 @@
   max-width: 600px;
   margin: 0 auto;
   padding: 20px;
-  background: #f8b500;
+  background: linear-gradient(135deg, #1e3c72, #2a5298);
   min-height: 100vh;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
@@ -46,7 +46,8 @@
   border-radius: 16px;
   padding: 24px;
   margin-bottom: 20px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 16px rgba(30, 60, 114, 0.1);
+  border: 1px solid rgba(30, 60, 114, 0.1);
 }
 
 .task-header {
@@ -63,13 +64,14 @@
 .task-header h3 {
   margin: 0;
   font-size: 18px;
-  color: #333;
+  color: #1e3c72;
+  font-weight: 600;
 }
 
 .difficulty-section p {
   margin: 0 0 12px 0;
   font-weight: 500;
-  color: #555;
+  color: #2c3e50;
 }
 
 .difficulty-buttons {
@@ -93,28 +95,38 @@
 }
 
 .difficulty-btn.beginner {
-  background: #4caf50;
+  background: linear-gradient(135deg, #27ae60, #2ecc71);
   color: white;
+  border: 2px solid #27ae60;
 }
 
 .difficulty-btn.intermediate {
-  background: #ff9800;
+  background: linear-gradient(135deg, #ff6b35, #ff8e53);
   color: white;
+  border: 2px solid #ff6b35;
 }
 
 .difficulty-btn.advanced {
-  background: #f44336;
+  background: linear-gradient(135deg, #e74c3c, #c0392b);
   color: white;
+  border: 2px solid #e74c3c;
 }
 
 .difficulty-btn.active {
-  border-color: #333;
+  border-color: #ecf0f1;
   transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(255, 255, 255, 0.3);
+}
+
+.difficulty-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
 }
 
 .random-task-btn {
   width: 100%;
-  background: linear-gradient(135deg, #8e2de2, #4a00e0);
+  background: linear-gradient(135deg, #1e3c72, #2a5298);
   color: white;
   border: none;
   padding: 16px 24px;
@@ -127,11 +139,13 @@
   align-items: center;
   justify-content: center;
   gap: 8px;
+  box-shadow: 0 4px 12px rgba(30, 60, 114, 0.3);
 }
 
 .random-task-btn:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(142, 45, 226, 0.3);
+  box-shadow: 0 6px 20px rgba(30, 60, 114, 0.4);
+  background: linear-gradient(135deg, #2a5298, #1e3c72);
 }
 
 .random-task-btn:disabled {
@@ -145,15 +159,17 @@
   border-radius: 16px;
   padding: 24px;
   margin-bottom: 20px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 16px rgba(30, 60, 114, 0.1);
+  border: 1px solid rgba(30, 60, 114, 0.1);
 }
 
 .current-task h3 {
   margin: 0 0 16px 0;
-  color: #333;
+  color: #1e3c72;
   display: flex;
   align-items: center;
   gap: 8px;
+  font-weight: 600;
 }
 
 .task-content {
@@ -167,18 +183,20 @@
 }
 
 .task-genre, .task-difficulty {
-  background: #f0f0f0;
-  padding: 4px 8px;
-  border-radius: 12px;
+  background: linear-gradient(135deg, #ecf0f1, #bdc3c7);
+  padding: 6px 12px;
+  border-radius: 16px;
   font-size: 12px;
-  color: #666;
-  font-weight: 500;
+  color: #2c3e50;
+  font-weight: 600;
+  border: 1px solid rgba(30, 60, 114, 0.1);
 }
 
 .task-content h4 {
   margin: 0 0 12px 0;
-  color: #2c3e50;
+  color: #1e3c72;
   font-size: 18px;
+  font-weight: 600;
 }
 
 .task-content p {
@@ -189,7 +207,8 @@
 
 .requirements h5 {
   margin: 0 0 8px 0;
-  color: #333;
+  color: #1e3c72;
+  font-weight: 600;
 }
 
 .requirements ul {
@@ -205,34 +224,38 @@
 .response-section textarea {
   width: 100%;
   padding: 16px;
-  border: 2px solid #ddd;
-  border-radius: 8px;
+  border: 2px solid #ecf0f1;
+  border-radius: 12px;
   font-family: inherit;
   font-size: 14px;
   resize: vertical;
   margin-bottom: 12px;
   box-sizing: border-box;
+  transition: all 0.2s;
 }
 
 .response-section textarea:focus {
   outline: none;
-  border-color: #4a00e0;
+  border-color: #1e3c72;
+  box-shadow: 0 0 0 3px rgba(30, 60, 114, 0.1);
 }
 
 .submit-btn {
-  background: #28a745;
+  background: linear-gradient(135deg, #ff6b35, #ff8e53);
   color: white;
   border: none;
   padding: 12px 24px;
-  border-radius: 6px;
+  border-radius: 8px;
   cursor: pointer;
-  font-weight: 500;
+  font-weight: 600;
   transition: all 0.2s;
+  box-shadow: 0 4px 12px rgba(255, 107, 53, 0.3);
 }
 
 .submit-btn:hover:not(:disabled) {
-  background: #218838;
+  background: linear-gradient(135deg, #ff8e53, #ff6b35);
   transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(255, 107, 53, 0.4);
 }
 
 .submit-btn:disabled {
@@ -242,12 +265,13 @@
 
 /* ユーザー統計 */
 .user-stats {
-  background: rgba(255, 255, 255, 0.9);
-  padding: 16px 20px;
-  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.95);
+  padding: 20px 24px;
+  border-radius: 16px;
   font-size: 14px;
-  color: #333;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  color: #2c3e50;
+  box-shadow: 0 4px 16px rgba(30, 60, 114, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .stats-row {

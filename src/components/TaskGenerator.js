@@ -149,19 +149,31 @@ const TaskGenerator = ({ user }) => {
           <div className="difficulty-buttons">
             <button 
               className={`difficulty-btn beginner ${selectedDifficulty === 'beginner' ? 'active' : ''}`}
-              onClick={() => setSelectedDifficulty('beginner')}
+              onClick={() => {
+                setSelectedDifficulty('beginner');
+                generateTask('beginner');
+              }}
+              disabled={isGenerating}
             >
               初級
             </button>
             <button 
               className={`difficulty-btn intermediate ${selectedDifficulty === 'intermediate' ? 'active' : ''}`}
-              onClick={() => setSelectedDifficulty('intermediate')}
+              onClick={() => {
+                setSelectedDifficulty('intermediate');
+                generateTask('intermediate');
+              }}
+              disabled={isGenerating}
             >
               <span>🌿</span> 中級
             </button>
             <button 
               className={`difficulty-btn advanced ${selectedDifficulty === 'advanced' ? 'active' : ''}`}
-              onClick={() => setSelectedDifficulty('advanced')}
+              onClick={() => {
+                setSelectedDifficulty('advanced');
+                generateTask('advanced');
+              }}
+              disabled={isGenerating}
             >
               <span>🔥</span> 上級
             </button>

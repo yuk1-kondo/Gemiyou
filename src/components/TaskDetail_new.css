@@ -1,0 +1,459 @@
+/* 🎨 TaskDetail - リッチUI（App.cssと統一） */
+
+/* ベース設定 */
+.task-detail {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #fccc00; /* Dick Bruna Yellow */
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+/* ヘッダー */
+.task-detail-header {
+  background: linear-gradient(135deg, #eb6100, #ff7315); /* Dick Bruna Red グラデーション */
+  color: white;
+  padding: 1.5rem 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  border-bottom: 3px solid #004c97; /* Dick Bruna Blue */
+}
+
+.back-button {
+  background: rgba(255, 255, 255, 0.2);
+  border: 2px solid white;
+  color: white;
+  font-size: 1rem;
+  cursor: pointer;
+  padding: 0.8rem 1.5rem;
+  border-radius: 25px;
+  transition: all 0.3s ease;
+  font-weight: 600;
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+}
+
+.back-button:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.task-detail-title {
+  font-size: 1.8rem;
+  font-weight: bold;
+  text-align: center;
+  flex: 1;
+}
+
+/* メインコンテンツ */
+.task-detail-content {
+  flex: 1;
+  max-width: 1000px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+/* タスク情報セクション */
+.task-info-section {
+  background: white;
+  padding: 2rem;
+  border-radius: 20px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+  border: 3px solid #004c97; /* Dick Bruna Blue */
+}
+
+.task-meta {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.meta-badge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0.8rem 1.5rem;
+  border-radius: 15px;
+  background: linear-gradient(135deg, #004c97, #0066cc);
+  color: white;
+  min-width: 120px;
+  box-shadow: 0 4px 15px rgba(0, 76, 151, 0.3);
+}
+
+.meta-label {
+  font-size: 0.8rem;
+  opacity: 0.9;
+  margin-bottom: 0.3rem;
+}
+
+.meta-value {
+  font-size: 1rem;
+  font-weight: bold;
+}
+
+.question-card {
+  background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+  padding: 2rem;
+  border-radius: 15px;
+  border-left: 5px solid #eb6100; /* Dick Bruna Red */
+}
+
+.question-title {
+  color: #eb6100;
+  font-size: 1.3rem;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.question-content p {
+  font-size: 1.1rem;
+  line-height: 1.6;
+  color: #2c3e50;
+}
+
+/* 回答入力セクション */
+.response-section {
+  background: white;
+  padding: 2rem;
+  border-radius: 20px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+  border: 3px solid #004c97;
+}
+
+.response-title {
+  color: #004c97;
+  font-size: 1.3rem;
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.response-textarea {
+  width: 100%;
+  min-height: 200px;
+  padding: 1.5rem;
+  border: 2px solid #e9ecef;
+  border-radius: 15px;
+  font-size: 1rem;
+  line-height: 1.6;
+  resize: vertical;
+  transition: all 0.3s ease;
+  font-family: inherit;
+}
+
+.response-textarea:focus {
+  outline: none;
+  border-color: #004c97;
+  box-shadow: 0 0 0 3px rgba(0, 76, 151, 0.1);
+}
+
+.response-textarea:disabled {
+  background-color: #f8f9fa;
+  opacity: 0.7;
+}
+
+.submit-button {
+  background: linear-gradient(135deg, #004c97, #0066cc);
+  color: white;
+  border: none;
+  padding: 1.2rem 3rem;
+  font-size: 1.2rem;
+  font-weight: bold;
+  border-radius: 25px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-top: 1.5rem;
+  width: 100%;
+  position: relative;
+  overflow: hidden;
+}
+
+.submit-button:hover:not(:disabled) {
+  background: linear-gradient(135deg, #0066cc, #0080ff);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 76, 151, 0.3);
+}
+
+.submit-button:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.submit-button.evaluating {
+  background: linear-gradient(135deg, #eb6100, #ff7315);
+}
+
+.loading-text {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.loading-dots {
+  display: inline-flex;
+  gap: 0.2rem;
+}
+
+.loading-dots span {
+  animation: bounce 1.4s ease-in-out infinite both;
+}
+
+.loading-dots span:nth-child(1) { animation-delay: -0.32s; }
+.loading-dots span:nth-child(2) { animation-delay: -0.16s; }
+
+@keyframes bounce {
+  0%, 80%, 100% {
+    transform: scale(0);
+  } 40% {
+    transform: scale(1);
+  }
+}
+
+/* 評価結果セクション */
+.evaluation-section {
+  background: white;
+  padding: 2rem;
+  border-radius: 20px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+  border: 3px solid #eb6100; /* Dick Bruna Red */
+}
+
+.evaluation-title {
+  color: #eb6100;
+  font-size: 1.3rem;
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* スコア表示カード */
+.score-display-card {
+  background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+  padding: 2rem;
+  border-radius: 15px;
+  margin-bottom: 1.5rem;
+}
+
+.main-score {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.score-circle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 120px;
+  height: 120px;
+  background: linear-gradient(135deg, #004c97, #0066cc);
+  color: white;
+  border-radius: 50%;
+  margin-bottom: 1rem;
+  box-shadow: 0 8px 25px rgba(0, 76, 151, 0.3);
+  flex-direction: column;
+}
+
+.score-number {
+  font-size: 2.5rem;
+  font-weight: bold;
+  line-height: 1;
+}
+
+.score-suffix {
+  font-size: 0.9rem;
+  opacity: 0.9;
+}
+
+.score-label {
+  font-size: 1.1rem;
+  color: #2c3e50;
+  margin-bottom: 0.5rem;
+}
+
+.score-grade {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #eb6100;
+}
+
+/* 項目別スコア */
+.detailed-scores {
+  border-top: 2px solid #e9ecef;
+  padding-top: 2rem;
+}
+
+.breakdown-title {
+  color: #004c97;
+  font-size: 1.1rem;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.score-breakdown {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.score-item {
+  background: white;
+  padding: 1rem;
+  border-radius: 10px;
+  border: 1px solid #e9ecef;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+.score-item-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.score-item-icon {
+  font-size: 1.2rem;
+}
+
+.score-item-label {
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+.score-item-value {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.score-bar {
+  flex: 1;
+  height: 8px;
+  background: #e9ecef;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.score-fill {
+  height: 100%;
+  background: linear-gradient(135deg, #004c97, #0066cc);
+  border-radius: 4px;
+  transition: width 0.8s ease;
+}
+
+.score-number-small {
+  font-weight: bold;
+  color: #004c97;
+  min-width: 50px;
+  text-align: right;
+}
+
+/* フィードバックカード */
+.feedback-card {
+  background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+  padding: 1.5rem;
+  border-radius: 15px;
+  border-left: 5px solid #004c97;
+}
+
+.feedback-title {
+  color: #004c97;
+  font-size: 1.1rem;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.feedback-content p {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: #2c3e50;
+  margin-bottom: 1rem;
+}
+
+.encouragement-card {
+  background: linear-gradient(135deg, #eb6100, #ff7315);
+  color: white;
+  padding: 1.5rem;
+  border-radius: 10px;
+  margin-top: 1rem;
+}
+
+.encouragement-title {
+  font-size: 1rem;
+  margin-bottom: 0.8rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.encouragement-content p {
+  font-size: 1rem;
+  line-height: 1.5;
+  margin: 0;
+}
+
+/* レスポンシブ対応 */
+@media (max-width: 768px) {
+  .task-detail-content {
+    padding: 1rem;
+    gap: 1.5rem;
+  }
+  
+  .task-detail-header {
+    padding: 1rem;
+  }
+  
+  .task-detail-title {
+    font-size: 1.4rem;
+  }
+  
+  .meta-badge {
+    min-width: 100px;
+    padding: 0.6rem 1rem;
+  }
+  
+  .score-circle {
+    width: 100px;
+    height: 100px;
+  }
+  
+  .score-number {
+    font-size: 2rem;
+  }
+  
+  .task-meta {
+    justify-content: center;
+  }
+  
+  .score-item-value {
+    flex-direction: column;
+    gap: 0.5rem;
+    align-items: stretch;
+  }
+  
+  .score-number-small {
+    text-align: center;
+  }
+}

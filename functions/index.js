@@ -1,4 +1,4 @@
-const {onRequest} = require("firebase-functions/v2/https");
+https://console.firebase.google.com/project/gemiyou/authentication/providersconst {onRequest} = require("firebase-functions/v2/https");
 const {onSchedule} = require("firebase-functions/v2/scheduler");
 const {onDocumentCreated} = require("firebase-functions/v2/firestore");
 const {GoogleGenerativeAI} = require("@google/generative-ai");
@@ -673,114 +673,213 @@ exports.evaluateTaskResponse = onRequest(async (req, res) => {
   }
 });
 
-// Generate AI Task Function (Scheduled) - Individual User Notifications
-exports.generateAITask = onSchedule("every 5 minutes", async (event) => {
-  try {
-    logger.info("Starting individual AI task generation...");
+// 🔧 安全な定期タスク生成機能 - 暴走防止機能付き
+exports.generateAITask = onSchedule({
+  schedule: "every 30 minutes", // 🔧 間隔を30分に延長
+  timeZone: "Asia/Tokyo",
+  memory: "512MB", // 🔧 メモリを512MBに増量
+  timeoutSeconds: 300, // 🔧 タイムアウト5分設定
+}, async (event) => {
+  const startTime = Date.now();
+  logger.info("🚀 安全な定期タスク生成開始...");
 
-    // Get all active users
-    const activeUsers = await getAllActiveUsers();
-    logger.info(`Found ${activeUsers.length} active users`);
+  try {
+    // 🔧 バッチサイズ制限：一度に処理するユーザー数を制限
+    const MAX_USERS_PER_BATCH = 20;
+    const MEMORY_THRESHOLD = 400; // MB
+
+    // アクティブユーザーを取得（制限付き）
+    const activeUsers = await getAllActiveUsersSafe(MAX_USERS_PER_BATCH);
+    logger.info(`🔍 アクティブユーザー: ${activeUsers.length}件 (最大${MAX_USERS_PER_BATCH}件)`);
 
     if (activeUsers.length === 0) {
-      logger.info("No active users found, skipping task generation");
+      logger.info("✅ アクティブユーザーなし、タスク生成をスキップ");
       return;
     }
 
-    // Generate tasks for each user individually
-    const taskPromises = activeUsers.map(async (user) => {
+    // 🔧 バッチ処理で安全にタスク生成
+    let successCount = 0;
+    let errorCount = 0;
+
+    for (let i = 0; i < activeUsers.length; i++) {
+      const user = activeUsers[i];
+      
       try {
-        // Select random AI personality for this user
-        const randomIndex = Math.floor(Math.random() * AI_PERSONALITIES.length);
-        const aiPersonality = AI_PERSONALITIES[randomIndex];
+        // 🔧 メモリ使用量チェック
+        const currentMemory = process.memoryUsage().heapUsed / 1024 / 1024;
+        if (currentMemory > MEMORY_THRESHOLD) {
+          logger.warn(`⚠️ メモリ使用量が閾値を超過: ${currentMemory.toFixed(2)}MB, 処理を停止`);
+          break;
+        }
 
-        // ランダムに難易度を選択
-        const difficulties = ['beginner', 'intermediate', 'advanced'];
-        const randomDifficulty = difficulties[Math.floor(Math.random() * difficulties.length)];
+        // 🔧 実行時間チェック
+        const elapsedTime = Date.now() - startTime;
+        if (elapsedTime > 240000) { // 4分でタイムアウト
+          logger.warn(`⚠️ 実行時間が4分を超過、処理を停止`);
+          break;
+        }
+
+        // 🔧 個別ユーザーのタスク生成数制限チェック
+        const userTaskCount = await getUserTodayTaskCount(user.userId);
+        if (userTaskCount >= 10) { // 1日10タスクまで
+          logger.info(`📊 ユーザー ${user.userId} は本日の上限に達成 (${userTaskCount}件)`);
+          continue;
+        }
+
+        // タスク生成実行
+        await generateTaskForUserSafe(user);
+        successCount++;
         
-        // GeminiAPIでタスクを動的生成
-        const generatedTask = await generateTaskWithGemini(randomDifficulty, aiPersonality);
+        // 🔧 処理間隔を設ける（負荷分散）
+        if (i < activeUsers.length - 1) {
+          await new Promise(resolve => setTimeout(resolve, 1000)); // 1秒待機
+        }
+
+      } catch (error) {
+        errorCount++;
+        logger.error(`❌ ユーザー ${user.userId} のタスク生成失敗:`, error);
         
-        // Create task document for this specific user
-        const task = {
-          content: generatedTask.content,
-          hint: generatedTask.hint,
-          expectation: generatedTask.expectation,
-          difficulty: randomDifficulty,
-          aiPersonality: aiPersonality,
-          status: "pending",
-          createdAt: admin.firestore.FieldValue.serverTimestamp(),
-          assignedTo: user.userId,
-          chatHistory: [],
-          isCompleted: false,
-          evaluation: null,
-          generatedAt: generatedTask.generatedAt
-        };
+        // 🔧 エラー率が高い場合は処理停止
+        if (errorCount > 5) {
+          logger.error(`🚨 エラー率が高すぎるため処理を停止 (エラー: ${errorCount}件)`);
+          break;
+        }
+      }
+    }
 
-        // Save task to global tasks collection
-        const taskDoc = await db.collection("tasks").add(task);
+    const elapsedTime = Date.now() - startTime;
+    const memoryUsed = process.memoryUsage().heapUsed / 1024 / 1024;
+    
+    logger.info(`✅ 定期タスク生成完了`, {
+      処理時間: `${elapsedTime}ms`,
+      メモリ使用量: `${memoryUsed.toFixed(2)}MB`,
+      成功: `${successCount}件`,
+      失敗: `${errorCount}件`,
+      対象ユーザー: `${activeUsers.length}件`
+    });
 
-        // Also save to user's personal tasks collection
-        await db.collection("users")
-            .doc(user.userId)
-            .collection("tasks")
-            .add(task);
+  } catch (error) {
+    logger.error("🚨 定期タスク生成で重大エラー:", error);
+    
+    // 🔧 エラー通知をSlack等に送信する場合はここに追加
+    // await sendErrorNotification("定期タスク生成エラー", error.message);
+  }
+});
 
-        // Send FCM notification to the specific user
-        const notificationTitle = `🧠 ${aiPersonality.name}からの依頼`;
-        const notificationBody = generatedTask.content.length > 60 ?
-          generatedTask.content.substring(0, 57) + "..." :
-          generatedTask.content;
+// 🔧 安全なユーザー取得関数 - バッチサイズ制限付き
+async function getAllActiveUsersSafe(maxUsers = 20) {
+  try {
+    const usersSnapshot = await db.collection("users")
+        .where("isActive", "==", true)
+        .limit(maxUsers) // 🔧 取得件数制限
+        .get();
 
-        await sendNotificationToUser(
-            user.fcmToken,
-            notificationTitle,
-            notificationBody,
-            {
-              taskId: taskDoc.id,
-              difficulty: randomDifficulty,
-              aiPersonality: aiPersonality.name,
-            },
-        );
-
-        logger.info(
-            `Dynamic task generated and notification sent to user ${user.userId}`,
-            {
-              taskId: taskDoc.id,
-              aiPersonality: aiPersonality.name,
-              difficulty: randomDifficulty
-            },
-        );
-
-        return {userId: user.userId, taskId: taskDoc.id, success: true};
-      } catch (userError) {
-        logger.error(
-            `Error generating task for user ${user.userId}:`,
-            userError,
-        );
-        return {
-          userId: user.userId,
-          success: false,
-          error: userError.message,
-        };
+    const users = [];
+    usersSnapshot.forEach((doc) => {
+      const userData = doc.data();
+      if (userData.fcmToken && userData.fcmToken !== 'notification-enabled') {
+        users.push({
+          userId: doc.id,
+          fcmToken: userData.fcmToken,
+          ...userData
+        });
       }
     });
 
-    // Wait for all tasks to be generated
-    const results = await Promise.allSettled(taskPromises);
-    const successCount = results.filter(
-        (r) => r.status === "fulfilled" && r.value.success,
-    ).length;
-    const failureCount = results.length - successCount;
-
-    logger.info(
-        `AI task generation completed: ${successCount} successful, ` +
-        `${failureCount} failed`,
-    );
+    return users;
   } catch (error) {
-    logger.error("Error generating AI task:", error);
+    logger.error("❌ ユーザー取得エラー:", error);
+    return [];
   }
-});
+}
+
+// 🔧 安全なタスク生成関数 - エラーハンドリング強化
+async function generateTaskForUserSafe(user) {
+  try {
+    // ランダムなAIパーソナリティを選択
+    const randomIndex = Math.floor(Math.random() * AI_PERSONALITIES.length);
+    const aiPersonality = AI_PERSONALITIES[randomIndex];
+
+    // ランダムに難易度を選択
+    const difficulties = ['beginner', 'intermediate', 'advanced'];
+    const randomDifficulty = difficulties[Math.floor(Math.random() * difficulties.length)];
+    
+    // GeminiAPIでタスクを動的生成
+    const generatedTask = await generateTaskWithGemini(randomDifficulty, aiPersonality);
+    
+    // タスクドキュメントを作成
+    const task = {
+      content: generatedTask.content,
+      hint: generatedTask.hint,
+      expectation: generatedTask.expectation,
+      difficulty: randomDifficulty,
+      aiPersonality: aiPersonality,
+      status: "pending",
+      createdAt: admin.firestore.FieldValue.serverTimestamp(),
+      userId: user.userId, // 🔧 assignedTo -> userId に統一
+      chatHistory: [],
+      isCompleted: false,
+      evaluation: null,
+      generatedAt: generatedTask.generatedAt
+    };
+
+    // グローバルタスクコレクションに保存
+    const taskDoc = await db.collection("tasks").add(task);
+
+    // ユーザーの個人タスクコレクションにも保存
+    await db.collection("users")
+        .doc(user.userId)
+        .collection("tasks")
+        .add(task);
+
+    // FCM通知を送信
+    const notificationTitle = `🧠 ${aiPersonality.name}からの依頼`;
+    const notificationBody = generatedTask.content.length > 60 ?
+      generatedTask.content.substring(0, 57) + "..." :
+      generatedTask.content;
+
+    await sendNotificationToUser(
+        user.fcmToken,
+        notificationTitle,
+        notificationBody,
+        {
+          taskId: taskDoc.id,
+          difficulty: randomDifficulty,
+          aiPersonality: aiPersonality.name,
+        }
+    );
+
+    logger.info(`✅ ユーザー ${user.userId} にタスク生成完了`, {
+      taskId: taskDoc.id,
+      difficulty: randomDifficulty,
+      aiPersonality: aiPersonality.name
+    });
+
+    return { success: true, taskId: taskDoc.id };
+
+  } catch (error) {
+    logger.error(`❌ ユーザー ${user.userId} のタスク生成エラー:`, error);
+    throw error;
+  }
+}
+
+// 🔧 ユーザーの本日のタスク数を取得
+async function getUserTodayTaskCount(userId) {
+  try {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    const tasksSnapshot = await db.collection("tasks")
+        .where("userId", "==", userId)
+        .where("createdAt", ">=", admin.firestore.Timestamp.fromDate(today))
+        .get();
+    
+    return tasksSnapshot.size;
+  } catch (error) {
+    logger.error(`❌ ユーザー ${userId} のタスク数取得エラー:`, error);
+    return 0;
+  }
+}
 
 // Evaluate User Response Function
 exports.evaluateResponse = onDocumentCreated(
