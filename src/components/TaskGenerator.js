@@ -142,9 +142,9 @@ const TaskGenerator = ({ user }) => {
       <div className="chat-section">
         <div className="chat-header">
           <span className="chat-icon">🧠</span>
-          <h2>Chat ヒューマン</h2>
+          <h2>Gemiyou</h2>
         </div>
-        <p className="chat-subtitle">AIがあなたに創造的なタスクを提案します</p>
+        <p className="chat-subtitle">AIからの依頼に、あなたのセンスでこたえよう</p>
       </div>
 
       {/* タスク生成セクション */}
