@@ -9,6 +9,16 @@ const TaskGenerator = ({ user }) => {
   console.log('🔍 firestoreService:', firestoreService);
   console.log('🔍 firestoreService.saveTaskResponse:', firestoreService?.saveTaskResponse);
   
+  // 難易度を日本語に変換する関数
+  const getDifficultyLabel = (difficulty) => {
+    switch (difficulty) {
+      case 'beginner': return '初級';
+      case 'intermediate': return '中級';
+      case 'advanced': return '上級';
+      default: return difficulty;
+    }
+  };
+  
   const [selectedDifficulty, setSelectedDifficulty] = useState('beginner');
   const [isGenerating, setIsGenerating] = useState(false);
   const [currentTask, setCurrentTask] = useState(null);
@@ -155,7 +165,7 @@ const TaskGenerator = ({ user }) => {
               }}
               disabled={isGenerating}
             >
-              初級
+              <span>🌱</span> 初級
             </button>
             <button 
               className={`difficulty-btn intermediate ${selectedDifficulty === 'intermediate' ? 'active' : ''}`}
@@ -197,7 +207,7 @@ const TaskGenerator = ({ user }) => {
           <div className="task-content">
             <div className="task-meta">
               <span className="task-genre">🎭 {currentTask.genre}</span>
-              <span className="task-difficulty">📊 {currentTask.difficulty}</span>
+              <span className="task-difficulty">📊 {getDifficultyLabel(currentTask.difficulty)}</span>
             </div>
             <h4>{currentTask.title}</h4>
             <p>{currentTask.description}</p>
