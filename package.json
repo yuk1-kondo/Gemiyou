@@ -1,7 +1,26 @@
 {
   "name": "gemiyou",
-  "version": "0.1.0",
-  "private": true,
+  "version": "1.0.0",
+  "description": "革新的な逆チャット体験 - AIがあなたにタスクを依頼し、あなたが応える新しいコミュニケーション形態",
+  "homepage": "https://gemiyou.web.app",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-username/Gemiyou-1.git"
+  },
+  "keywords": [
+    "ai",
+    "gemini",
+    "react",
+    "typescript",
+    "firebase",
+    "creative-tasks",
+    "ai-human-interaction",
+    "chat",
+    "hackathon"
+  ],
+  "author": "Gemiyou Team",
+  "license": "MIT",
+  "private": false,
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
     "@testing-library/dom": "^10.4.0",

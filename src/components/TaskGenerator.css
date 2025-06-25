@@ -1,10 +1,24 @@
 .task-generator {
-  max-width: 600px;
+  max-width: 800px;
   margin: 0 auto;
   padding: 20px;
   background: linear-gradient(135deg, #1e3c72, #2a5298);
   min-height: 100vh;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* 追加の美しいエフェクト */
+.task-generator::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(circle at 20% 80%, rgba(248, 147, 68, 0.1) 0%, transparent 50%),
+              radial-gradient(circle at 80% 20%, rgba(255, 100, 47, 0.1) 0%, transparent 50%);
+  pointer-events: none;
+  z-index: -1;
 }
 
 /* Chat セクション */
@@ -14,7 +28,7 @@
   padding: 24px;
   margin-bottom: 20px;
   color: white;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 4px 12px rgba(255, 107, 53, 0.2);
 }
 
 .chat-header {
@@ -42,7 +56,7 @@
 
 /* タスク生成セクション */
 .task-section {
-  background: white;
+  background: #F4F4F4;
   border-radius: 16px;
   padding: 24px;
   margin-bottom: 20px;
@@ -71,7 +85,7 @@
 .difficulty-section p {
   margin: 0 0 12px 0;
   font-weight: 500;
-  color: #2c3e50;
+  color: #1e3c72;
 }
 
 .difficulty-buttons {
@@ -94,28 +108,32 @@
   gap: 6px;
 }
 
+/* 難易度ボタン - 新しいカラーパレットに統一 */
 .difficulty-btn.beginner {
   background: linear-gradient(135deg, #27ae60, #2ecc71);
   color: white;
   border: 2px solid #27ae60;
+  box-shadow: 0 2px 8px rgba(39, 174, 96, 0.3);
 }
 
 .difficulty-btn.intermediate {
   background: linear-gradient(135deg, #ff6b35, #ff8e53);
   color: white;
   border: 2px solid #ff6b35;
+  box-shadow: 0 2px 8px rgba(255, 107, 53, 0.3);
 }
 
 .difficulty-btn.advanced {
   background: linear-gradient(135deg, #e74c3c, #c0392b);
   color: white;
   border: 2px solid #e74c3c;
+  box-shadow: 0 2px 8px rgba(231, 76, 60, 0.3);
 }
 
 .difficulty-btn.active {
-  border-color: #ecf0f1;
+  border-color: white;
   transform: scale(1.05);
-  box-shadow: 0 4px 12px rgba(255, 255, 255, 0.3);
+  box-shadow: 0 4px 16px rgba(255, 255, 255, 0.3);
 }
 
 .difficulty-btn:disabled {
@@ -124,6 +142,7 @@
   transform: none;
 }
 
+/* タスク生成ボタン - 新しいカラーパレットで統一 */
 .random-task-btn {
   width: 100%;
   background: linear-gradient(135deg, #1e3c72, #2a5298);
@@ -153,7 +172,7 @@
   cursor: not-allowed;
 }
 
-/* 現在のタスク */
+/* 現在のタスクカード - 新しいカラーパレットで統一 */
 .current-task {
   background: white;
   border-radius: 16px;
@@ -201,7 +220,7 @@
 
 .task-content p {
   margin: 0 0 16px 0;
-  color: #555;
+  color: #575959;
   line-height: 1.5;
 }
 
@@ -293,6 +312,22 @@
   color: #999;
 }
 
+/* アニメーション */
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.current-task {
+  animation: slideInUp 0.5s ease-out;
+}
+
 /* レスポンシブ */
 @media (max-width: 480px) {
   .task-generator {
@@ -305,5 +340,29 @@
   
   .chat-actions {
     flex-direction: column;
+  }
+}
+
+/* PC/Mac向けの最適化 */
+@media (min-width: 768px) {
+  .task-generator {
+    padding: 40px;
+  }
+  
+  .chat-section, .task-section, .current-task {
+    padding: 32px;
+  }
+  
+  .difficulty-buttons {
+    gap: 16px;
+  }
+  
+  .difficulty-btn {
+    padding: 16px 20px;
+  }
+  
+  .random-task-btn {
+    padding: 20px 32px;
+    font-size: 18px;
   }
 }
