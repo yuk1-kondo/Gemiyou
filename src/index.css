@@ -1,30 +1,33 @@
-/* DICK BRUNA FORCE OVERRIDE */
-html, body, #root {
-  background: #fccc00 !important; /* ディック・ブルーナー黄色 */
-  color: #2c3e50 !important;
-  display: flex !important;
-  flex-direction: column !important;
-  align-items: center !important;
-  justify-content: center !important;
-  width: 100% !important;
-  min-height: 100vh !important;
+/* Clean Base Styles with Liquid Glass Background */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
-#root {
-  width: 100% !important;
-  max-width: 100vw !important;
-  margin: 0 auto !important;
+html {
+  background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);
+  height: 100%;
 }
 
 body {
   margin: 0;
-  background: #fccc00 !important; /* ディック・ブルーナー黄色 */
-  color: #2c3e50 !important;
+  padding: 0;
+  background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);
+  color: #1e293b;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
     'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  height: 100%;
+}
+
+#root {
+  background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);
+  width: 100%;
+  min-height: 100vh;
+  height: 100%;
 }
 
 code {

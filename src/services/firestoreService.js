@@ -21,12 +21,10 @@ class FirestoreService {
       if (userDoc.exists()) {
         // 既存ユーザーの更新
         await updateDoc(userRef, userData);
-        console.log('ユーザー情報を更新しました:', uid);
       } else {
         // 新規ユーザーの登録
         userData.createdAt = serverTimestamp();
         await setDoc(userRef, userData);
-        console.log('新規ユーザーを登録しました:', uid);
       }
 
       return true;
@@ -46,7 +44,6 @@ class FirestoreService {
         lastActive: serverTimestamp(),
       });
       
-      console.log('FCMトークンを更新しました:', uid);
       return true;
     } catch (error) {
       console.error('FCMトークン更新エラー:', error);
@@ -88,8 +85,6 @@ class FirestoreService {
   // タスクの回答を保存
   async saveTaskResponse(taskId, userId, response, evaluation) {
     try {
-      console.log('回答保存開始:', { taskId, userId, responseLength: response.length });
-      
       // 回答をresponsesコレクションに保存
       const responseData = {
         taskId,
@@ -110,7 +105,6 @@ class FirestoreService {
         responseId: responseDoc.id
       });
       
-      console.log('✅ タスク回答を保存しました:', responseDoc.id);
       return true;
     } catch (error) {
       console.error('❌ タスク回答保存エラー:', error);

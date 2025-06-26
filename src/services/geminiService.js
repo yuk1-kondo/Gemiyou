@@ -1,13 +1,7 @@
 class GeminiService {
   constructor() {
-    console.log('🚀 GeminiService 初期化開始');
     const createDynamicTaskUrl = process.env.REACT_APP_CREATE_DYNAMIC_TASK_URL;
     const evaluateTaskUrl = process.env.REACT_APP_EVALUATE_TASK_URL;
-
-    console.log('🔗 環境変数確認:', {
-      createDynamicTaskUrl,
-      evaluateTaskUrl
-    });
 
     if (!createDynamicTaskUrl) {
       console.error('❌ REACT_APP_CREATE_DYNAMIC_TASK_URL が設定されていません');
@@ -16,11 +10,6 @@ class GeminiService {
 
     this.createDynamicTaskUrl = createDynamicTaskUrl;
     this.evaluateTaskUrl = evaluateTaskUrl || '';
-    
-    console.log('✅ GeminiService 初期化完了:', {
-      createDynamicTaskUrl: this.createDynamicTaskUrl,
-      evaluateTaskUrl: this.evaluateTaskUrl
-    });
   }
 
   // Cloud Functionsを使用してタスクを生成（メインの生成方法）
@@ -46,11 +35,22 @@ class GeminiService {
       
       const data = await response.json();
       
-      if (!data.success) {
-        throw new Error(data.message || 'タスク生成に失敗しました');
+      // Cloud Functionsからの実際のレスポンス形式に合わせて修正
+      if (data.error) {
+        throw new Error(data.error);
       }
       
-      return data.task;
+      // Cloud Functionsのレスポンス形式に合わせて調整
+      return {
+        id: data.taskId,
+        content: data.content,
+        difficulty: data.difficulty,
+        aiPersonality: data.aiPersonality,
+        aiPersonalityType: data.aiPersonalityType, // 専門領域を追加
+        hint: data.hint,
+        expectation: data.expectation,
+        genre: data.aiPersonality // UI表示用（名前）
+      };
     } catch (error) {
       throw error;
     }

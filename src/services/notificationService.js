@@ -19,10 +19,6 @@ class NotificationService {
       const permission = await Notification.requestPermission();
       this.hasPermission = permission === 'granted';
       
-      if (this.hasPermission && userId) {
-        console.log('✅ 通知許可を取得しました');
-      }
-      
       return this.hasPermission;
     } catch (error) {
       console.error('通知許可取得エラー:', error);

@@ -26,7 +26,6 @@ const Auth = ({ onAuthSuccess }) => {
     try {
       if (isLogin) {
         const result = await signInWithEmailAndPassword(auth, email, password);
-        console.log('✅ ログイン成功:', result.user.uid);
       } else {
         const result = await createUserWithEmailAndPassword(auth, email, password);
         
@@ -35,14 +34,10 @@ const Auth = ({ onAuthSuccess }) => {
             displayName: displayName
           });
         }
-        
-        console.log('✅ 新規登録成功:', result.user.uid);
       }
       
       onAuthSuccess();
     } catch (error) {
-      console.error('❌ 認証エラー:', error);
-      
       let errorMessage = '';
       switch (error.code) {
         case 'auth/invalid-email':
@@ -87,12 +82,9 @@ const Auth = ({ onAuthSuccess }) => {
       });
       
       const result = await signInWithPopup(auth, provider);
-      console.log('✅ Google認証成功:', result.user.uid);
       
       onAuthSuccess();
     } catch (error) {
-      console.error('❌ Google認証エラー:', error);
-      
       let errorMessage = 'Google認証に失敗しました。';
       
       if (error.code === 'auth/popup-closed-by-user') {
@@ -113,11 +105,9 @@ const Auth = ({ onAuthSuccess }) => {
 
     try {
       const result = await signInAnonymously(auth);
-      console.log('✅ 匿名認証成功:', result.user.uid);
       
       onAuthSuccess();
     } catch (error) {
-      console.error('❌ 匿名認証エラー:', error);
       setError('匿名認証に失敗しました: ' + error.message);
     } finally {
       setLoading(false);
@@ -128,7 +118,7 @@ const Auth = ({ onAuthSuccess }) => {
     <div className="auth-container">
       <div className="auth-card">
         <div className="auth-header">
-          <h1>🧠 Gemiyou</h1>
+          <h1>Gemiyou</h1>
           <p>AIタスク生成プラットフォーム</p>
         </div>
 
@@ -199,7 +189,7 @@ const Auth = ({ onAuthSuccess }) => {
             className="auth-button primary"
             disabled={loading}
           >
-            {loading ? '⏳ 処理中...' : (isLogin ? '🔐 ログイン' : '📝 新規登録')}
+            {loading ? '処理中...' : (isLogin ? 'ログイン' : '新規登録')}
           </button>
         </form>
 
@@ -212,7 +202,6 @@ const Auth = ({ onAuthSuccess }) => {
           className="auth-button google"
           disabled={loading}
         >
-          <span className="google-icon">🚀</span>
           Googleでログイン
         </button>
 
@@ -221,7 +210,7 @@ const Auth = ({ onAuthSuccess }) => {
           className="auth-button anonymous"
           disabled={loading}
         >
-          🎭 ゲストとして続行
+          ゲストとして続行
         </button>
       </div>
     </div>

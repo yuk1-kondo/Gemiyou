@@ -4,11 +4,6 @@ import { firestoreService } from '../services/firestoreService';
 import './TaskGenerator.css';
 
 const TaskGenerator = ({ user }) => {
-  // デバッグ: サービスが正しくインポートされているかチェック
-  console.log('🔍 geminiService:', geminiService);
-  console.log('🔍 firestoreService:', firestoreService);
-  console.log('🔍 firestoreService.saveTaskResponse:', firestoreService?.saveTaskResponse);
-  
   // 難易度を日本語に変換する関数
   const getDifficultyLabel = (difficulty) => {
     switch (difficulty) {
@@ -46,18 +41,17 @@ const TaskGenerator = ({ user }) => {
   const generateTask = async (difficulty = selectedDifficulty) => {
     setIsGenerating(true);
     try {
-      console.log('タスク生成開始:', { difficulty, userId: user?.uid });
       const task = await geminiService.generateTaskWithCloudFunction(user?.uid, difficulty);
-      console.log('生成されたタスク:', task);
       
       // Cloud Functionsからのレスポンス形式に合わせて調整
       const processedTask = {
         id: task.id,
-        title: `${task.genre}からの依頼`,
-        description: task.content || task.question || '',
+        title: `${task.aiPersonality || 'AI'}からの依頼`,
+        description: task.content || '',
         requirements: task.hint ? [task.hint] : (task.expectation ? [task.expectation] : []),
         difficulty: task.difficulty || difficulty,
-        genre: task.genre || task.aiPersonality?.name || 'AI',
+        genre: task.aiPersonalityType || 'AI', // 専門領域をメインラベルとして表示
+        aiPersonality: task.aiPersonality, // 名前をタイトルで使用
         expectation: task.expectation,
         originalTask: task // 元のタスクデータも保持
       };
@@ -97,13 +91,6 @@ const TaskGenerator = ({ user }) => {
       // 正しいタスクIDを取得（Cloud Functionsから返されたもの）
       const taskId = currentTask.originalTask?.id || currentTask.id;
       
-      console.log('回答送信開始:', { 
-        taskId, 
-        response: response.substring(0, 50) + '...',
-        firestoreService: !!firestoreService,
-        geminiService: !!geminiService
-      });
-      
       // 回答を評価
       const evaluation = await geminiService.evaluateResponse(taskId, response);
       
@@ -141,7 +128,6 @@ const TaskGenerator = ({ user }) => {
       {/* Chat機能セクション */}
       <div className="chat-section">
         <div className="chat-header">
-          <span className="chat-icon">🧠</span>
           <h2>Gemiyou</h2>
         </div>
         <p className="chat-subtitle">AIからの依頼に、あなたのセンスでこたえよう</p>
@@ -150,7 +136,6 @@ const TaskGenerator = ({ user }) => {
       {/* タスク生成セクション */}
       <div className="task-section">
         <div className="task-header">
-          <span className="task-icon">🎯</span>
           <h3>新しいタスクを生成</h3>
         </div>
         
@@ -165,7 +150,7 @@ const TaskGenerator = ({ user }) => {
               }}
               disabled={isGenerating}
             >
-              <span>🌱</span> 初級
+              初級
             </button>
             <button 
               className={`difficulty-btn intermediate ${selectedDifficulty === 'intermediate' ? 'active' : ''}`}
@@ -175,7 +160,7 @@ const TaskGenerator = ({ user }) => {
               }}
               disabled={isGenerating}
             >
-              <span>🌿</span> 中級
+              中級
             </button>
             <button 
               className={`difficulty-btn advanced ${selectedDifficulty === 'advanced' ? 'active' : ''}`}
@@ -185,7 +170,7 @@ const TaskGenerator = ({ user }) => {
               }}
               disabled={isGenerating}
             >
-              <span>🔥</span> 上級
+              上級
             </button>
           </div>
         </div>
@@ -195,7 +180,6 @@ const TaskGenerator = ({ user }) => {
           onClick={() => generateTask()}
           disabled={isGenerating}
         >
-          <span>🎲</span> 
           {isGenerating ? 'タスク生成中...' : 'ランダムタスクを生成'}
         </button>
       </div>
@@ -203,11 +187,11 @@ const TaskGenerator = ({ user }) => {
       {/* 現在のタスク表示 */}
       {currentTask && (
         <div className="current-task">
-          <h3>📝 現在のタスク</h3>
+          <h3>現在のタスク</h3>
           <div className="task-content">
             <div className="task-meta">
-              <span className="task-genre">🎭 {currentTask.genre}</span>
-              <span className="task-difficulty">📊 {getDifficultyLabel(currentTask.difficulty)}</span>
+              <span className="task-genre">{currentTask.genre}</span>
+              <span className="task-difficulty">{getDifficultyLabel(currentTask.difficulty)}</span>
             </div>
             <h4>{currentTask.title}</h4>
             <p>{currentTask.description}</p>
@@ -244,18 +228,14 @@ const TaskGenerator = ({ user }) => {
       {/* ユーザー統計 */}
       <div className="user-stats">
         <div className="stats-row">
-          <span className="stats-icon">👤</span>
           <span>ユーザー: {user?.displayName || user?.email?.split('@')[0] || 'user-175...'}</span>
         </div>
         <div className="stats-row">
-          <span className="stats-icon">📊</span>
           <span>生成済みタスク数: {userStats.totalTasks}</span>
           <span className="separator">|</span>
-          <span className="stats-icon">🏆</span>
           <span>累計得点: {userStats.totalScore}点</span>
         </div>
         <div className="stats-row">
-          <span className="stats-icon">🎯</span>
           <span>今日の完了数: {userStats.completedToday}</span>
         </div>
       </div>
