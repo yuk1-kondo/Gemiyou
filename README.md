@@ -23,7 +23,7 @@ Gemiyouは、従来のチャットボットとは正反対のアプローチを�
 ### 🛠️ 技術スタック
 
 **フロントエンド:**
-- React 19 + JavaScript
+- React + JavaScript
 - Firebase SDK (Auth, Firestore, FCM)
 - 液体ガラス効果CSS
 
