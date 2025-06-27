@@ -25,7 +25,7 @@ const Auth = ({ onAuthSuccess }) => {
 
     try {
       if (isLogin) {
-        const result = await signInWithEmailAndPassword(auth, email, password);
+        await signInWithEmailAndPassword(auth, email, password);
       } else {
         const result = await createUserWithEmailAndPassword(auth, email, password);
         
@@ -81,7 +81,7 @@ const Auth = ({ onAuthSuccess }) => {
         prompt: 'select_account'
       });
       
-      const result = await signInWithPopup(auth, provider);
+      await signInWithPopup(auth, provider);
       
       onAuthSuccess();
     } catch (error) {
@@ -104,7 +104,7 @@ const Auth = ({ onAuthSuccess }) => {
     setError('');
 
     try {
-      const result = await signInAnonymously(auth);
+      await signInAnonymously(auth);
       
       onAuthSuccess();
     } catch (error) {

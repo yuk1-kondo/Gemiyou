@@ -199,7 +199,7 @@ class FirestoreService {
           }
           return responseDate === today;
         } catch (error) {
-          console.log('日付変換エラー:', error, r.submittedAt);
+          console.error('日付変換エラー:', error, r.submittedAt);
           return false;
         }
       }).length;
@@ -218,27 +218,6 @@ class FirestoreService {
     } catch (error) {
       console.error('統計情報取得エラー:', error);
       return { totalTasks: 0, completedToday: 0, totalScore: 0 };
-    }
-  }
-
-  // デバッグ用：すべてのユーザーデータを取得
-  async getAllUsers() {
-    try {
-      const usersRef = collection(db, 'users');
-      const querySnapshot = await getDocs(usersRef);
-      
-      const users = [];
-      querySnapshot.forEach((docSnap) => {
-        users.push({
-          id: docSnap.id,
-          ...docSnap.data()
-        });
-      });
-      
-      return users;
-    } catch (error) {
-      console.error('ユーザー取得エラー:', error);
-      return [];
     }
   }
 }

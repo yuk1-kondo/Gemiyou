@@ -11,7 +11,7 @@ class NotificationService {
   // 通知許可を求める
   async requestPermission(userId) {
     if (!this.isSupported) {
-      console.log('このブラウザは通知をサポートしていません');
+      console.warn('このブラウザは通知をサポートしていません');
       return false;
     }
 
@@ -29,7 +29,7 @@ class NotificationService {
   // ローカル通知を表示
   async showNotification(options) {
     if (!this.hasPermission) {
-      console.log('通知許可がありません');
+      console.warn('通知許可がありません');
       return false;
     }
 
@@ -102,7 +102,7 @@ class NotificationService {
   // サービスワーカー経由での通知（より高度な機能）
   async showServiceWorkerNotification(options) {
     if (!('serviceWorker' in navigator)) {
-      console.log('Service Worker はサポートされていません');
+      console.warn('Service Worker はサポートされていません');
       return this.showNotification(options);
     }
 
