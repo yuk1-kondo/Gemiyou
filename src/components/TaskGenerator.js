@@ -128,7 +128,7 @@ const TaskGenerator = ({ user }) => {
       {/* Chat機能セクション */}
       <div className="chat-section">
         <div className="chat-header">
-          <h2>Gemiyou</h2>
+          <img src="/Gemiyou-logo.png" alt="Gemiyou" className="gemiyou-logo" />
         </div>
         <p className="chat-subtitle">AIからの依頼に、あなたのセンスでこたえよう</p>
       </div>

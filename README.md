@@ -1,6 +1,11 @@
-# 🧠 Gemiyou
+# 🎨 Gemiyou
 
 > **革新的な逆チャット体験** - AIがあなたにタスクを依頼し、あなたが応える新しいコミュニケーション形態
+
+[![Live Demo](https://img.shields.io/badge/Live-Demo-brightgreen)](https://gemiyou.web.app)
+[![Firebase](https://img.shields.io/badge/Firebase-orange)](https://firebase.google.com/)
+[![React](https://img.shields.io/badge/React-19-blue)](https://reactjs.org/)
+[![Gemini AI](https://img.shields.io/badge/Gemini-AI-purple)](https://cloud.google.com/ai/)
 
 ## 🎯 プロジェクト概要
 
@@ -8,30 +13,34 @@ Gemiyouは、従来のチャットボットとは正反対のアプローチを�
 
 ### ✨ 主要機能
 
-- **10のAI人格システム**: 専門特化した10のAI人格（アイデア発想・物語創作・コピーライティング・デザイン思考・ライフハック・エンタメ・問題解決・表現力・ナレッジマスター・フューチャリスト）
+- **AI人格システム**: タケシ（アイデア創出）、サクラ（物語創作）、レン（文章作成）など多様なAI人格
 - **短時間実行可能タスク**: 3-25分で完結する創造的で楽しいタスクの自動生成
 - **創造性重視設計**: 文章のみで完結する創作・アイデア・物語生成に特化
-- **厳格な自動評価**: Gemini AIによる詳細なフィードバックと建設的な評価
+- **厳格な自動評価**: Gemini 2.5 Flash APIによる詳細なフィードバックと建設的な評価
 - **プッシュ通知**: Firebase Cloud Messagingによる新しいタスクの通知
-- **レスポンシブUI**: モダンなグラデーションデザインとスムーズなアニメーション
+- **液体ガラスデザイン**: 美しいモダンUIとスムーズなアニメーション
 
 ### 🛠️ 技術スタック
 
 **フロントエンド:**
-- React 18 + TypeScript
+- React 19 + JavaScript
 - Firebase SDK (Auth, Firestore, FCM)
-- Modern CSS with gradients and animations
+- 液体ガラス効果CSS
 
 **バックエンド:**
-- Firebase Firestore (データベース)
+- Firebase Firestore (NoSQLデータベース)
 - Firebase Cloud Functions (サーバーレス)
-- Firebase Authentication (匿名認証)
+- Firebase Authentication (匿名認証対応)
 - Firebase Hosting
 
 **AI:**
-- Google Gemini AI API
+- Google Gemini 2.5 Flash API
 - 動的プロンプト生成
 - JSON構造化レスポンス
+
+## 🌐 ライブデモ
+
+**本番環境**: [https://gemiyou.web.app](https://gemiyou.web.app)
 
 ## 🚀 セットアップ手順
 
@@ -39,7 +48,7 @@ Gemiyouは、従来のチャットボットとは正反対のアプローチを�
 
 ```bash
 git clone <repository-url>
-cd Gemiyou-1
+cd Gemiyou
 npm install
 ```
 

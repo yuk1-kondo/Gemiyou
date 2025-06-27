@@ -118,7 +118,7 @@ const Auth = ({ onAuthSuccess }) => {
     <div className="auth-container">
       <div className="auth-card">
         <div className="auth-header">
-          <h1>Gemiyou</h1>
+          <img src="/Gemiyou-logo.png" alt="Gemiyou" className="gemiyou-logo" />
           <p>AIタスク生成プラットフォーム</p>
         </div>
 

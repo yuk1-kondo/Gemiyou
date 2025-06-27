@@ -28,6 +28,15 @@ yarn-error.log*
 *_backup.*
 *_recovery.*
 *_debug.*
+*.old.*
+
+# Firebase cache
+.firebase/
+firebase-debug.log*
+
+# Temporary files
+*.tmp
+*.temp
 *_test.*
 test-*.html
 test-*.js

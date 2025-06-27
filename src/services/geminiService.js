@@ -4,12 +4,13 @@ class GeminiService {
     const evaluateTaskUrl = process.env.REACT_APP_EVALUATE_TASK_URL;
 
     if (!createDynamicTaskUrl) {
-      console.error('❌ REACT_APP_CREATE_DYNAMIC_TASK_URL が設定されていません');
-      throw new Error('REACT_APP_CREATE_DYNAMIC_TASK_URL が設定されていません');
+      console.warn('⚠️ REACT_APP_CREATE_DYNAMIC_TASK_URL が設定されていません。ローカル開発用のデフォルトURLを使用します。');
+      this.createDynamicTaskUrl = 'https://us-central1-gemiyou.cloudfunctions.net/createDynamicTask';
+    } else {
+      this.createDynamicTaskUrl = createDynamicTaskUrl;
     }
 
-    this.createDynamicTaskUrl = createDynamicTaskUrl;
-    this.evaluateTaskUrl = evaluateTaskUrl || '';
+    this.evaluateTaskUrl = evaluateTaskUrl || 'https://us-central1-gemiyou.cloudfunctions.net/evaluateTaskResponse';
   }
 
   // Cloud Functionsを使用してタスクを生成（メインの生成方法）
