@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { geminiService } from '../services/geminiService';
 import { firestoreService } from '../services/firestoreService';
+import { auth } from '../firebase';
 import './TaskGenerator.css';
 
 const TaskGenerator = ({ user }) => {
@@ -35,6 +36,17 @@ const TaskGenerator = ({ user }) => {
     if (user) {
       const stats = await firestoreService.getUserStats(user.uid);
       setUserStats(stats);
+    }
+  };
+
+  const handleLogout = async () => {
+    if (window.confirm('ログアウトしますか？')) {
+      try {
+        await auth.signOut();
+      } catch (error) {
+        console.error('ログアウトエラー:', error);
+        alert('ログアウトに失敗しました');
+      }
     }
   };
 
@@ -238,6 +250,16 @@ const TaskGenerator = ({ user }) => {
         <div className="stats-row">
           <span>今日の完了数: {userStats.completedToday}</span>
         </div>
+      </div>
+
+      {/* ログアウトボタン */}
+      <div className="logout-section">
+        <button 
+          className="logout-btn"
+          onClick={handleLogout}
+        >
+          ログアウト
+        </button>
       </div>
     </div>
   );
