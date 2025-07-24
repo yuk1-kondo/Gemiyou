@@ -40,7 +40,7 @@ Gemiyouは、従来のチャットボットとは正反対のアプローチを�
 
 ## 🌐 ライブデモ
 
-**本番環境**: [https://gemiyou.web.app](https://gemiyou.web.app)
+
 
 ## 🚀 セットアップ手順
 
